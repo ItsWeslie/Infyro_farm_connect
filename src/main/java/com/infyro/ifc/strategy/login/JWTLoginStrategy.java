@@ -1,8 +1,8 @@
 package com.infyro.ifc.strategy.login;
 
 import com.infyro.ifc.api.LoginTypeConstants;
-import com.infyro.ifc.dto.auth.AuthRequest;
-import com.infyro.ifc.dto.auth.AuthResponse;
+import com.infyro.ifc.dto.auth.LoginRequest;
+import com.infyro.ifc.dto.auth.LoginResponse;
 import com.infyro.ifc.enums.UserType;
 import com.infyro.ifc.model.User;
 import com.infyro.ifc.security.JWTService;
@@ -37,12 +37,12 @@ public class JWTLoginStrategy implements LoginStrategy {
     }
 
     @Override
-    public ResponseEntity<AuthResponse> login(AuthRequest authRequest) {
+    public ResponseEntity<LoginResponse> login(LoginRequest loginRequest) {
 
         Authentication auth = authManager
                 .authenticate(new UsernamePasswordAuthenticationToken(
-                        authRequest.email(),
-                        authRequest.password()
+                        loginRequest.email(),
+                        loginRequest.password()
                         ));
 
         UserPrincipal principal = (UserPrincipal) auth.getPrincipal();
@@ -57,7 +57,7 @@ public class JWTLoginStrategy implements LoginStrategy {
                 .status(HttpStatus.OK)
                 .header(HttpHeaders.SET_COOKIE, getJwtCookie(token))
                 .body(
-                     AuthResponse.builder()
+                     LoginResponse.builder()
                              .username(user.getEmail())
                              .role(UserType.USER)
                              .message("Login successful")

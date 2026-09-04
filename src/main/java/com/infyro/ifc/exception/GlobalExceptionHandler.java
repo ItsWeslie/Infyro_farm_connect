@@ -11,12 +11,24 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler
+    @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<APIResponse> handleUserNotFoundException(UserNotFoundException e) {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
-                .body(APIResponse.builder().
-                        message(e.getMessage()).
-                        build());
+                .body(new APIResponse(e.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<APIResponse> handleInvalidTokenException(InvalidTokenException e) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new APIResponse(e.getMessage()));
+    }
+
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<APIResponse> handleUserAlreadyExistsException(UserAlreadyExistsException e) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(new APIResponse(e.getMessage()));
     }
 }

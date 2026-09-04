@@ -1,4 +1,4 @@
-package com.infyro.ifc.service;
+package com.infyro.ifc.service.login;
 
 
 import com.infyro.ifc.dto.APIResponse;

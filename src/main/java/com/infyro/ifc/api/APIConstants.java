@@ -17,6 +17,7 @@ public final class APIConstants {
         public static final String LOGIN = "/login";
         public static final String LOGOUT = "/logout";
         public static final String VALIDATE = "/validate";
+        public static final String SIGNUP = "/signup";
     }
 
     //User Endpoints

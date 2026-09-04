@@ -1,7 +1,7 @@
-package com.infyro.ifc.service;
+package com.infyro.ifc.service.login;
 
 
-import com.infyro.ifc.dto.auth.AuthResponse;
+import com.infyro.ifc.dto.auth.LoginResponse;
 import com.infyro.ifc.enums.UserType;
 import com.infyro.ifc.exception.InvalidTokenException;
 import com.infyro.ifc.exception.UserNotFoundException;
@@ -16,12 +16,12 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class AuthValidateService {
+public class TokenValidateService {
 
     private final JWTService jwtService;
     private final UserRepo userRepo;
 
-    public ResponseEntity<AuthResponse> validate(HttpServletRequest request) {
+    public ResponseEntity<LoginResponse> validate(HttpServletRequest request) {
 
             String token = extractToken(request);
 
@@ -38,7 +38,7 @@ public class AuthValidateService {
             }
 
             return ResponseEntity.ok(
-                    new AuthResponse(
+                    new LoginResponse(
                             user.getUsername(),
                             UserType.USER,
                             "validated successfully",
