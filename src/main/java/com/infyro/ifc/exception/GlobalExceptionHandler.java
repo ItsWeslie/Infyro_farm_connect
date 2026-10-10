@@ -31,4 +31,25 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.CONFLICT)
                 .body(new APIResponse(e.getMessage()));
     }
+
+    @ExceptionHandler(FarmNotFoundException.class)
+    public ResponseEntity<APIResponse> handleFarmNotFoundException(FarmNotFoundException e) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(new APIResponse(e.getMessage()));
+    }
+
+    @ExceptionHandler(FieldIsFullWithCropsException.class)
+    public ResponseEntity<APIResponse> handleFieldIsFullWithCropsException(FieldIsFullWithCropsException e) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new APIResponse(e.getMessage()));
+    }
+
+    @ExceptionHandler(FieldNotFoundException.class)
+    public ResponseEntity<APIResponse> handleFieldNotFoundException(FieldNotFoundException e) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(new APIResponse(e.getMessage()));
+    }
 }

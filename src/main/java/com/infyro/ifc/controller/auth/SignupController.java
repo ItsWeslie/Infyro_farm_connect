@@ -1,4 +1,4 @@
-package com.infyro.ifc.controller;
+package com.infyro.ifc.controller.auth;
 
 import com.infyro.ifc.api.APIConstants;
 import com.infyro.ifc.dto.APIResponse;

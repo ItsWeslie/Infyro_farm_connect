@@ -11,6 +11,8 @@ public final class APIConstants {
     //Resources
     public static final String AUTH = BASE_URL + "/auth";
     public static final String USER = BASE_URL + "/user";
+    public static final String FARM = BASE_URL + "/farm";
+    public static final String FIELD = BASE_URL + "/field";
 
     //Auth Endpoints
     public static final class Auth{
@@ -23,5 +25,20 @@ public final class APIConstants {
     //User Endpoints
     public static final class Member{
         public static final String MEMBER_DASHBOARD = APIConstants.USER + "/dashboard";
+    }
+
+    //Farm Endpoints
+    public static final class Farm{
+        public static final String CREATE = "/create";
+        public static final String VIEW_FARM = "/view/{id}";
+        public static final String REMOVE = "/remove/{id}";
+        public static final String OWNED_FARMS = "/owned-farms";
+        public static final String UPDATE = "/update/{id}";
+    }
+
+    //Field Endpoints
+    public static final class Field{
+        public static final String UNALLOCATED_FIELDS = "/unallocated-fields/{id}";
+        public static final String MAP_CROP = "/map-crop/{id}";
     }
 }
