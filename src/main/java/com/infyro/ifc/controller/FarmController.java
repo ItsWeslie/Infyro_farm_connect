@@ -26,33 +26,28 @@ public class FarmController {
     @PostMapping(APIConstants.Farm.CREATE)
     public ResponseEntity<FarmResponse> createNewFarm(@RequestBody @Valid FarmRequest req,
                                            Principal principal) {
-        String Email = principal.getName();
-
-        return farmService.addNewFarm(req,Email);
+        return farmService.createNewFarm(req,principal.getName());
     }
 
     @GetMapping(APIConstants.Farm.VIEW_FARM)
-    public ResponseEntity<FarmResponse> getFarmWithID(@PathVariable Long id){
-            return farmService.viewFarmData(id);
+    public ResponseEntity<FarmResponse> getFarmByID(@PathVariable Long id,Principal principal) {
+        return farmService.getFarmByID(id,principal.getName());
     }
 
     @GetMapping(APIConstants.Farm.OWNED_FARMS)
-    public ResponseEntity<List<FarmResponse>> getOwnedFarms(Principal principal) {
-
-        String Email = principal.getName();
-
-        return farmService.getOwnedFarmsForUser(Email);
+    public ResponseEntity<List<FarmResponse>> getFarmByOwner(Principal principal) {
+        return farmService.getFarmsByOwner(principal.getName());
 
     }
 
-    @DeleteMapping(APIConstants.Farm.REMOVE)
-    public ResponseEntity<APIResponse> removeFarm(@PathVariable Long id){
-       return farmService.removeFarmWithID(id);
+    @DeleteMapping(APIConstants.Farm.DELETE)
+    public ResponseEntity<APIResponse> deleteFarm(@PathVariable Long id,Principal principal) {
+       return farmService.deleteFarm(id,principal.getName());
     }
 
     @PutMapping(APIConstants.Farm.UPDATE)
-    public ResponseEntity<FarmResponse> updateFarm(@PathVariable Long id,
+    public ResponseEntity<FarmResponse> updateFarm(@PathVariable Long id,Principal principal,
                                         @RequestBody FarmRequest request) {
-            return farmService.updateFarmWithID(id,request);
+            return farmService.updateFarm(id, principal.getName(), request);
     }
 }

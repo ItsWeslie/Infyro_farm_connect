@@ -31,10 +31,10 @@ public final class APIConstants {
     //Farm Endpoints
     public static final class Farm{
         public static final String CREATE = "/create";
-        public static final String VIEW_FARM = "/view/{id}";
-        public static final String REMOVE = "/remove/{id}";
+        public static final String VIEW_FARM = "/{id}";
+        public static final String DELETE = "/{id}";
         public static final String OWNED_FARMS = "/owned-farms";
-        public static final String UPDATE = "/update/{id}";
+        public static final String UPDATE = "/{id}";
     }
 
     //Field Endpoints

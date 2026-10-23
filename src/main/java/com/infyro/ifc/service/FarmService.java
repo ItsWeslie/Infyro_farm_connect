@@ -29,10 +29,10 @@ public class FarmService {
     private final FarmMapper farmMapper;
 
     @Transactional
-    public ResponseEntity<FarmResponse> addNewFarm(FarmRequest req,String Email){
+    public ResponseEntity<FarmResponse> createNewFarm(FarmRequest req,String Email){
 
         User user = userRepo.findUserByEmail(Email)
-                .orElseThrow(()-> new UserNotFoundException("user not found"));
+                .orElseThrow(()-> new UserNotFoundException("User not found"));
 
         Farm newFarm = Farm.builder()
                             .farmName(req.farmName())
@@ -50,10 +50,10 @@ public class FarmService {
 
 
     @Transactional(readOnly = true)
-    public ResponseEntity<FarmResponse> viewFarmData(Long id) {
+    public ResponseEntity<FarmResponse> getFarmByID(Long id,String Email) {
 
-        Farm farm = farmRepo.findById(id)
-                .orElseThrow(()-> new FarmNotFoundException("There is no farm found with given id:"+id));
+        Farm farm = farmRepo.findByIdAndOwner_Email(id, Email)
+                .orElseThrow(()-> new FarmNotFoundException("Farm not found with ID: "+id));
 
         FarmResponse response = FarmResponse.builder()
                 .id(farm.getId())
@@ -66,40 +66,51 @@ public class FarmService {
     }
 
     @Transactional(readOnly = true)
-    public ResponseEntity<List<FarmResponse>> getOwnedFarmsForUser(String Email) {
+    public ResponseEntity<List<FarmResponse>> getFarmsByOwner(String email) {
 
-        User owner = userRepo.findUserByEmail(Email)
-                .orElseThrow(()-> new UserNotFoundException("user not found with given mail ID: "+Email));
-
-        List<FarmResponse> responses = owner.getFarms()
+        List<FarmResponse> responses = farmRepo.findAllByOwner_Email(email)
                 .stream()
-                .map(farmMapper::mapToFarmResponse).toList();
+                .map(farmMapper::mapToFarmResponse)
+                .toList();
 
         return ResponseEntity.ok(responses);
     }
 
     @Transactional
-    public ResponseEntity<APIResponse> removeFarmWithID(Long id){
+    public ResponseEntity<APIResponse> deleteFarm(Long id, String email) {
 
-            boolean flag = farmRepo.existsById(id);
+        boolean exists = farmRepo.existsByIdAndOwner_Email(id, email);
 
-            if(!flag){
-                    throw new FarmNotFoundException("Farm not found with given id:"+id);
-            }
+        if (!exists) {
+            throw new FarmNotFoundException(
+                    "Farm not found with given id: " + id
+            );
+        }
 
-            farmRepo.deleteById(id);
-            return ResponseEntity.ok(new APIResponse("Farm deleted successfully"));
+        farmRepo.deleteByIdAndOwner_Email(id, email);
+
+        return ResponseEntity.ok(
+                new APIResponse("Farm deleted successfully")
+        );
     }
 
     @Transactional
-    public ResponseEntity<FarmResponse> updateFarmWithID(Long id,FarmRequest request) {
-        Farm oldFarm = farmRepo.findById(id)
-                .orElseThrow(()-> new FarmNotFoundException("Farm not found with given id: "+id));
+    public ResponseEntity<FarmResponse> updateFarm(
+            Long id, String email, FarmRequest request) {
+
+        Farm oldFarm = farmRepo.findByIdAndOwner_Email(id, email)
+                .orElseThrow(() ->
+                        new FarmNotFoundException(
+                                "Farm not found with given id: " + id
+                        ));
 
         oldFarm.setFarmName(request.farmName());
 
         Farm updatedFarm = farmRepo.save(oldFarm);
-        return ResponseEntity.ok(farmMapper.mapToFarmResponse(updatedFarm));
+
+        return ResponseEntity.ok(
+                farmMapper.mapToFarmResponse(updatedFarm)
+        );
     }
 
 }
