@@ -26,9 +26,9 @@ public class FarmController {
     @PostMapping(APIConstants.Farm.CREATE)
     public ResponseEntity<FarmResponse> createNewFarm(@RequestBody @Valid FarmRequest req,
                                            Principal principal) {
-        String username = principal.getName();
+        String Email = principal.getName();
 
-        return farmService.addNewFarm(req,username);
+        return farmService.addNewFarm(req,Email);
     }
 
     @GetMapping(APIConstants.Farm.VIEW_FARM)
@@ -39,9 +39,9 @@ public class FarmController {
     @GetMapping(APIConstants.Farm.OWNED_FARMS)
     public ResponseEntity<List<FarmResponse>> getOwnedFarms(Principal principal) {
 
-        String username = principal.getName();
+        String Email = principal.getName();
 
-        return farmService.getOwnedFarmsForUser(username);
+        return farmService.getOwnedFarmsForUser(Email);
 
     }
 

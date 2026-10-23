@@ -29,9 +29,9 @@ public class FarmService {
     private final FarmMapper farmMapper;
 
     @Transactional
-    public ResponseEntity<FarmResponse> addNewFarm(FarmRequest req,String username){
+    public ResponseEntity<FarmResponse> addNewFarm(FarmRequest req,String Email){
 
-        User user = userRepo.findUserByEmail(username)
+        User user = userRepo.findUserByEmail(Email)
                 .orElseThrow(()-> new UserNotFoundException("user not found"));
 
         Farm newFarm = Farm.builder()
@@ -66,10 +66,10 @@ public class FarmService {
     }
 
     @Transactional(readOnly = true)
-    public ResponseEntity<List<FarmResponse>> getOwnedFarmsForUser(String username) {
+    public ResponseEntity<List<FarmResponse>> getOwnedFarmsForUser(String Email) {
 
-        User owner = userRepo.findUserByUsername(username)
-                .orElseThrow(()-> new UserNotFoundException("user not found with given username: "+username));
+        User owner = userRepo.findUserByEmail(Email)
+                .orElseThrow(()-> new UserNotFoundException("user not found with given mail ID: "+Email));
 
         List<FarmResponse> responses = owner.getFarms()
                 .stream()
