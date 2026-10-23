@@ -58,7 +58,6 @@ public class FarmService {
         FarmResponse response = FarmResponse.builder()
                 .id(farm.getId())
                 .name(farm.getFarmName())
-                .owner(farm.getOwner())
                 .fields(farm.getFields())
                 .build();
 

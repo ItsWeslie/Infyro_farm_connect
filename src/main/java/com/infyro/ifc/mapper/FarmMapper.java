@@ -13,7 +13,6 @@ public class FarmMapper {
         return FarmResponse.builder()
                 .id(farm.getId())
                 .name(farm.getFarmName())
-                .owner(farm.getOwner())
                 .fields(farm.getFields())
                 .build();
     }
