@@ -27,11 +27,14 @@ public class Field {
     @Column(updatable = false)
     private Long id;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false)
     private String fieldName;
 
     @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal area;
+    private BigDecimal totalArea;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal availableArea;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

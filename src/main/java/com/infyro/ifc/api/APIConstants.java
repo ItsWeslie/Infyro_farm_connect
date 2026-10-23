@@ -39,13 +39,16 @@ public final class APIConstants {
 
     //Field Endpoints
     public static final class Field{
-        public static final String UNALLOCATED_FIELDS = "/unallocated-fields/{id}";
-        public static final String MAP_CROP = "/map-crop/{id}";
+        public static final String CREATE = "/{farmId}/fields";
+        public static final String GET_FIELDS_BY_FARM = "/farm/{farmId}";
+        public static final String GET_FIELD_BY_ID = "/{fieldId}";
+        public static final String UPDATE = "/{fieldId}";
+        public static final String DELETE = "/{fieldId}";
     }
 
     //Crop Endpoints
     public static final class Crop{
-        public static final String CREATE = "/create";
+        public static final String CREATE = "/fields/{fieldId}/crops";
         public static final String ALLOCATE_FIELD = "/allocate-field/{field_id}/{crop_id}";
         public static final String CULTIVATE_CROP = "/cultivate-crop/{field_id}/{crop_id}";
         public static final String UPDATE = "/update";
