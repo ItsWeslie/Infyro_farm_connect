@@ -127,4 +127,71 @@ class HarvestRecordServiceTest {
     private HarvestRecordRequest request(LocalDate date) {
         return new HarvestRecordRequest(date, new BigDecimal("2.500"), HarvestUnit.KILOGRAM, "harvest");
     }
+
+    @Test
+    void rejectsHarvestForCancelledPlanting() {
+        CropPlanting planting = CropPlanting.builder().id(4L)
+                .plantedOn(LocalDate.of(2026, 1, 10))
+                .status(CropPlantingStatus.CANCELLED).build();
+        when(plantings.findByIdAndField_Farm_Owner_Email(4L, "owner@example.com"))
+                .thenReturn(Optional.of(planting));
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> service.create(4L, "owner@example.com", request(LocalDate.of(2026, 4, 10))));
+
+        assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
+        verify(records, never()).save(any());
+    }
+
+    @Test
+    void rejectsHarvestForCompletedPlanting() {
+        CropPlanting planting = CropPlanting.builder().id(4L)
+                .plantedOn(LocalDate.of(2026, 1, 10))
+                .status(CropPlantingStatus.COMPLETED).build();
+        when(plantings.findByIdAndField_Farm_Owner_Email(4L, "owner@example.com"))
+                .thenReturn(Optional.of(planting));
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> service.create(4L, "owner@example.com", request(LocalDate.of(2026, 4, 10))));
+
+        assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
+        verify(records, never()).save(any());
+    }
+
+    @Test
+    void rejectsFutureHarvestDateAtServiceLayer() {
+        CropPlanting planting = CropPlanting.builder().id(4L)
+                .plantedOn(LocalDate.of(2026, 1, 10))
+                .status(CropPlantingStatus.ACTIVE).build();
+        when(plantings.findByIdAndField_Farm_Owner_Email(4L, "owner@example.com"))
+                .thenReturn(Optional.of(planting));
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> service.create(4L, "owner@example.com", request(LocalDate.now().plusDays(1))));
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
+        verify(records, never()).save(any());
+    }
+
+    @Test
+    void allowsEarlyHarvestForActivePlanting() {
+        LocalDate earlyDate = LocalDate.of(2026, 3, 1);
+        CropPlanting planting = CropPlanting.builder().id(4L)
+                .plantedOn(LocalDate.of(2026, 1, 10))
+                .expectedHarvestOn(LocalDate.of(2026, 4, 10))
+                .status(CropPlantingStatus.ACTIVE).build();
+        when(plantings.findByIdAndField_Farm_Owner_Email(4L, "owner@example.com"))
+                .thenReturn(Optional.of(planting));
+        when(records.save(any(HarvestRecord.class))).thenAnswer(invocation -> {
+            HarvestRecord record = invocation.getArgument(0);
+            record.setId(56L);
+            return record;
+        });
+
+        HarvestRecordResponse response = service.create(
+                4L, "owner@example.com", request(earlyDate));
+
+        assertEquals(56L, response.id());
+        verify(records).save(any(HarvestRecord.class));
+    }
 }
