@@ -13,7 +13,8 @@ public final class APIConstants {
     public static final String USER = BASE_URL + "/user";
     public static final String FARM = BASE_URL + "/farm";
     public static final String FIELD = BASE_URL + "/field";
-    public static final String CROP = BASE_URL + "/crop";
+    //public static final String CROP = BASE_URL + "/crop";
+    public static final String CROP_TYPE = BASE_URL + "/crop-types";
 
     //Auth Endpoints
     public static final class Auth{
@@ -46,14 +47,12 @@ public final class APIConstants {
         public static final String DELETE = "/{fieldId}";
     }
 
-    //Crop Endpoints
-    public static final class Crop{
-        public static final String CREATE = "/fields/{fieldId}/crops";
-        public static final String ALLOCATE_FIELD = "/allocate-field/{field_id}/{crop_id}";
-        public static final String CULTIVATE_CROP = "/cultivate-crop/{field_id}/{crop_id}";
-        public static final String UPDATE = "/update";
-        public static final String DELETE = "/delete";
-        public static final String GET_CROP = "/get/{id}";
-        public static final String GET_ALL_CROPS = "/get/all";
+    //CropType Endpoints
+    public static final class CropType{
+        public static final String CREATE = "/{farmId}";
+        public static final String UPDATE = "/{farmId}/{id}";
+        public static final String DELETE = "/{farmId}/{id}";
+        public static final String GET_CROP = "/{farmId}/{id}";
+        public static final String GET_ALL_CROPS = "/{farmId}";
     }
 }
