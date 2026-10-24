@@ -15,6 +15,7 @@ public final class APIConstants {
     public static final String FIELD = BASE_URL + "/field";
     public static final String CROP_PLANTING = BASE_URL + "/crop-plantings";
     public static final String CROP_TYPE = BASE_URL + "/crop-types";
+    public static final String CROP_ACTIVITY = BASE_URL + "/crop-activities";
 
     //Auth Endpoints
     public static final class Auth{
@@ -54,6 +55,12 @@ public final class APIConstants {
         public static final String DELETE = "/{farmId}/{id}";
         public static final String GET_CROP = "/{farmId}/{id}";
         public static final String GET_ALL_CROPS = "/{farmId}";
+    }
+
+    public static final class CropActivity {
+        public static final String BY_PLANTING = "/planting/{plantingId}";
+        public static final String BY_ID = "/{id}";
+        public static final String STATUS = "/{id}/status";
     }
 
     public static final class CropPlanting{
