@@ -13,7 +13,7 @@ public final class APIConstants {
     public static final String USER = BASE_URL + "/user";
     public static final String FARM = BASE_URL + "/farm";
     public static final String FIELD = BASE_URL + "/field";
-    //public static final String CROP = BASE_URL + "/crop";
+    public static final String CROP_PLANTING = BASE_URL + "/crop-plantings";
     public static final String CROP_TYPE = BASE_URL + "/crop-types";
 
     //Auth Endpoints
@@ -25,9 +25,9 @@ public final class APIConstants {
     }
 
     //User Endpoints
-    public static final class Member{
-        public static final String MEMBER_DASHBOARD = APIConstants.USER + "/dashboard";
-    }
+//    public static final class Member{
+//        public static final String MEMBER_DASHBOARD = APIConstants.USER + "/dashboard";
+//    }
 
     //Farm Endpoints
     public static final class Farm{
@@ -54,5 +54,14 @@ public final class APIConstants {
         public static final String DELETE = "/{farmId}/{id}";
         public static final String GET_CROP = "/{farmId}/{id}";
         public static final String GET_ALL_CROPS = "/{farmId}";
+    }
+
+    public static final class CropPlanting{
+        public static final String CREATE = "/fields/{fieldId}";
+        public static final String GET_BY_FIELD = "/fields/{fieldId}";
+        public static final String GET_BY_ID = "/{id}";
+        public static final String UPDATE = "/{id}";
+        public static final String UPDATE_STATUS = "/{id}/status";
+        public static final String DELETE = "/{id}";
     }
 }

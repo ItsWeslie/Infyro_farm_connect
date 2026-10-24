@@ -57,8 +57,6 @@ public class Field {
 
     @Builder.Default
     @OneToMany(mappedBy = "field",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true,
             fetch = FetchType.LAZY)
-    private List<Crop> crops = new ArrayList<>();
+    private List<CropPlanting> crops = new ArrayList<>();
 }
