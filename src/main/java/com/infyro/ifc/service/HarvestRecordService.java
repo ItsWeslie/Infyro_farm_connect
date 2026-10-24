@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -70,7 +71,13 @@ public class HarvestRecordService {
     public void delete(Long id, String email) {
         HarvestRecord record = records.findByIdAndCropPlanting_Field_Farm_Owner_Email(id, email)
                 .orElseThrow(() -> notFound("Harvest record not found"));
-        records.delete(record);
+        if (record.isVoided()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Harvest record is already voided");
+        }
+        record.setVoided(true);
+        record.setVoidedAt(Instant.now());
+        record.setVoidReason("Voided by owner; create a replacement harvest record to correct this entry");
+        records.save(record);
     }
 
     private CropPlanting getPlanting(Long id, String email) {
@@ -81,7 +88,8 @@ public class HarvestRecordService {
     private HarvestRecordResponse response(HarvestRecord record) {
         return new HarvestRecordResponse(record.getId(), record.getCropPlanting().getId(),
                 record.getHarvestDate(), record.getQuantity(), record.getUnit(),
-                record.getNotes(), record.getCreatedAt(), record.getUpdatedAt());
+                record.getNotes(), record.getCreatedAt(), record.getUpdatedAt(),
+                record.isVoided(), record.getVoidedAt(), record.getVoidReason());
     }
 
     private ResponseStatusException notFound(String message) {
