@@ -67,6 +67,11 @@ public class CropActivityLogService {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "Completed or cancelled activity logs cannot be edited");
         }
+        if (request.status() != log.getStatus()
+                && !isAllowedTransition(log.getStatus(), request.status())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Invalid activity status transition");
+        }
         CropPlanting planting = getOwnedPlanting(request.cropPlantingId(), email);
         log.setCropPlanting(planting);
         log.setDayNumber(request.dayNumber());
