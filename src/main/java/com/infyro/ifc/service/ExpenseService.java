@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.time.Instant;
 
 @Service
 @RequiredArgsConstructor
@@ -52,14 +53,20 @@ public class ExpenseService {
     public void delete(Long id, String email) {
         Expense expense = expenses.findByIdAndFarm_Owner_Email(id, email)
                 .orElseThrow(() -> notFound("Expense not found"));
-        expenses.delete(expense);
+        if (expense.isVoided()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Expense is already voided");
+        }
+        expense.setVoided(true);
+        expense.setVoidedAt(Instant.now());
+        expense.setVoidReason("Voided by owner; create a replacement expense to correct this entry");
+        expenses.save(expense);
     }
 
     private ExpenseResponse response(Expense e) {
         return new ExpenseResponse(e.getId(), e.getFarm().getId(),
                 e.getCropPlanting() == null ? null : e.getCropPlanting().getId(),
                 e.getAmount(), e.getExpenseDate(), e.getCategory(), e.getDescription(),
-                e.getCreatedAt(), e.getUpdatedAt());
+                e.getCreatedAt(), e.getUpdatedAt(), e.isVoided(), e.getVoidedAt(), e.getVoidReason());
     }
     private ResponseStatusException notFound(String message) {
         return new ResponseStatusException(HttpStatus.NOT_FOUND, message);
