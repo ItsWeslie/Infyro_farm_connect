@@ -136,7 +136,17 @@ public class CropPlantingService {
                     "Invalid planting status transition");
         }
 
+        // Serialize lifecycle changes against field-area allocations and other
+        // planting status changes for the same field.
+        getLockedField(planting.getField().getId(), email);
+
         planting.setStatus(newStatus);
+        if (newStatus == CropPlantingStatus.COMPLETED) {
+            planting.setCompletedOn(LocalDate.now());
+        } else if (newStatus == CropPlantingStatus.CANCELLED) {
+            planting.setCompletedOn(null);
+        }
+
         return ResponseEntity.ok(cropPlantingMapper.toResponse(
                 plantingRepository.save(planting)));
     }

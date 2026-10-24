@@ -1,4 +1,3 @@
-
 package com.infyro.ifc.service;
 
 import com.infyro.ifc.enums.CropPlantingStatus;
@@ -17,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -52,7 +52,7 @@ class CropPlantingServiceTest {
         field = Field.builder()
                 .id(FIELD_ID)
                 .totalArea(new BigDecimal("10.00"))
-                .availableArea(new BigDecimal("7.00"))
+                .crops(new ArrayList<>())
                 .build();
 
         planting = CropPlanting.builder()
@@ -62,6 +62,8 @@ class CropPlantingServiceTest {
                 .maturityTimeInDays(90)
                 .status(CropPlantingStatus.PLANNED)
                 .build();
+
+        field.getCrops().add(planting);
 
         when(plantingRepository.findOwnedPlantingForUpdate(
                 PLANTING_ID, EMAIL))
@@ -99,8 +101,8 @@ class CropPlantingServiceTest {
     }
 
     @Test
-    void completingHarvestedPlantingRestoresAreaAndSetsCompletionDate() {
-        planting.setStatus(CropPlantingStatus.HARVESTED);
+    void completingHarvestingPlantingRestoresAreaAndSetsCompletionDate() {
+        planting.setStatus(CropPlantingStatus.HARVESTING);
 
         when(fieldRepo.findOwnedFieldForUpdate(FIELD_ID, EMAIL))
                 .thenReturn(Optional.of(field));
