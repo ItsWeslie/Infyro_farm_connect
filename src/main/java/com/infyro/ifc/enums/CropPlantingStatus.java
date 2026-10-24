@@ -2,9 +2,8 @@ package com.infyro.ifc.enums;
 
 public enum CropPlantingStatus {
     PLANNED,
-    PLANTED,
-    GROWING,
-    HARVESTED,
+    ACTIVE,
+    HARVESTING,
     COMPLETED,
     CANCELLED
 }
