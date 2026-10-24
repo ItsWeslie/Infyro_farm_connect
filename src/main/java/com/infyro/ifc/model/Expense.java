@@ -42,6 +42,15 @@ public class Expense {
     @Column(nullable = false, length = 1000)
     private String description;
 
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean voided = false;
+
+    private Instant voidedAt;
+
+    @Column(length = 500)
+    private String voidReason;
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
