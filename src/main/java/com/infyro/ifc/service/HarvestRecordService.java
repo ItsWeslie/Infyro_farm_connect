@@ -1,6 +1,8 @@
 package com.infyro.ifc.service;
 
-import com.infyro.ifc.dto.harvest.*;
+import com.infyro.ifc.dto.harvest.HarvestRecordRequest;
+import com.infyro.ifc.dto.harvest.HarvestRecordResponse;
+import com.infyro.ifc.enums.CropPlantingStatus;
 import com.infyro.ifc.model.CropPlanting;
 import com.infyro.ifc.model.HarvestRecord;
 import com.infyro.ifc.repository.CropPlantingRepo;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -22,21 +25,38 @@ public class HarvestRecordService {
     @Transactional
     public HarvestRecordResponse create(Long plantingId, String email, HarvestRecordRequest request) {
         CropPlanting planting = getPlanting(plantingId, email);
-        if (request.harvestDate().isBefore(planting.getPlantedOn()))
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Harvest date cannot be before planting date");
-        if (planting.getExpectedHarvestOn() != null && request.harvestDate().isBefore(planting.getExpectedHarvestOn())
-                && planting.getStatus() == com.infyro.ifc.enums.CropPlantingStatus.PLANNED)
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Activate planting before recording an early harvest");
-        HarvestRecord record = HarvestRecord.builder().cropPlanting(planting)
-                .harvestDate(request.harvestDate()).quantity(request.quantity()).unit(request.unit())
-                .notes(request.notes() == null || request.notes().isBlank() ? null : request.notes().trim()).build();
+
+        if (request.harvestDate() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Harvest date is required");
+        }
+        if (request.harvestDate().isAfter(LocalDate.now())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Harvest date cannot be in the future");
+        }
+        if (planting.getPlantedOn() == null || request.harvestDate().isBefore(planting.getPlantedOn())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Harvest date cannot be before planting date");
+        }
+        if (planting.getStatus() != CropPlantingStatus.ACTIVE
+                && planting.getStatus() != CropPlantingStatus.HARVESTING) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Harvest records can only be added to active or harvesting plantings");
+        }
+
+        HarvestRecord record = HarvestRecord.builder()
+                .cropPlanting(planting)
+                .harvestDate(request.harvestDate())
+                .quantity(request.quantity())
+                .unit(request.unit())
+                .notes(request.notes() == null || request.notes().isBlank() ? null : request.notes().trim())
+                .build();
         return response(records.save(record));
     }
 
     @Transactional(readOnly = true)
     public List<HarvestRecordResponse> list(Long plantingId, String email) {
         getPlanting(plantingId, email);
-        return records.findAllByCropPlanting_IdAndCropPlanting_Field_Farm_Owner_EmailOrderByHarvestDateDescCreatedAtDesc(plantingId, email)
+        return records.findAllByCropPlanting_IdAndCropPlanting_Field_Farm_Owner_EmailOrderByHarvestDateDescCreatedAtDesc(
+                        plantingId, email)
                 .stream().map(this::response).toList();
     }
 
@@ -57,10 +77,13 @@ public class HarvestRecordService {
         return plantings.findByIdAndField_Farm_Owner_Email(id, email)
                 .orElseThrow(() -> notFound("Crop planting not found"));
     }
-    private HarvestRecordResponse response(HarvestRecord r) {
-        return new HarvestRecordResponse(r.getId(), r.getCropPlanting().getId(), r.getHarvestDate(),
-                r.getQuantity(), r.getUnit(), r.getNotes(), r.getCreatedAt(), r.getUpdatedAt());
+
+    private HarvestRecordResponse response(HarvestRecord record) {
+        return new HarvestRecordResponse(record.getId(), record.getCropPlanting().getId(),
+                record.getHarvestDate(), record.getQuantity(), record.getUnit(),
+                record.getNotes(), record.getCreatedAt(), record.getUpdatedAt());
     }
+
     private ResponseStatusException notFound(String message) {
         return new ResponseStatusException(HttpStatus.NOT_FOUND, message);
     }
