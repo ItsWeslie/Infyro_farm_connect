@@ -9,4 +9,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     List<Expense> findAllByFarm_IdAndFarm_Owner_EmailOrderByExpenseDateDescCreatedAtDesc(Long farmId, String email);
     List<Expense> findAllByCropPlanting_IdAndFarm_Owner_EmailOrderByExpenseDateDescCreatedAtDesc(Long plantingId, String email);
     Optional<Expense> findByIdAndFarm_Owner_Email(Long id, String email);
+
+    boolean existsByFarm_Id(Long farmId);
+    boolean existsByCropPlanting_Id(Long plantingId);
 }
