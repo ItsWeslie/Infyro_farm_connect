@@ -8,9 +8,12 @@ import com.infyro.ifc.mapper.CropPlantingMapper;
 import com.infyro.ifc.model.CropPlanting;
 import com.infyro.ifc.model.CropType;
 import com.infyro.ifc.model.Field;
+import com.infyro.ifc.repository.CropActivityLogRepository;
 import com.infyro.ifc.repository.CropPlantingRepo;
 import com.infyro.ifc.repository.CropTypeRepository;
+import com.infyro.ifc.repository.ExpenseRepository;
 import com.infyro.ifc.repository.FieldRepo;
+import com.infyro.ifc.repository.HarvestRecordRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,48 +33,37 @@ public class CropPlantingService {
     private final CropTypeRepository cropTypeRepository;
     private final FieldRepo fieldRepo;
     private final CropPlantingMapper cropPlantingMapper;
+    private final ExpenseRepository expenseRepository;
+    private final HarvestRecordRepository harvestRecordRepository;
+    private final CropActivityLogRepository activityLogRepository;
 
     @Transactional
-    public ResponseEntity<CropPlantingResponse> create(Long fieldId,
-                                                       String email,
-                                                       CropPlantingRequest request) {
+    public ResponseEntity<CropPlantingResponse> create(Long fieldId, String email, CropPlantingRequest request) {
         Field field = getLockedField(fieldId, email);
-
         CropType cropType = getCropType(field, request.cropTypeId(), email);
         int maturity = resolveMaturity(request, cropType);
         validateDates(request.plantedOn(), request.expectedHarvestOn());
 
         if (request.cropArea().compareTo(field.getAvailableArea()) > 0) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT, "Insufficient available field area");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Insufficient available field area");
         }
 
         LocalDate expectedHarvest = request.expectedHarvestOn() != null
-                ? request.expectedHarvestOn()
-                : request.plantedOn().plusDays(maturity);
-
+                ? request.expectedHarvestOn() : request.plantedOn().plusDays(maturity);
         CropPlanting planting = CropPlanting.builder()
-                .field(field)
-                .cropType(cropType)
-                .cropArea(request.cropArea())
-                .plantedOn(request.plantedOn())
-                .expectedHarvestOn(expectedHarvest)
-                .maturityTimeInDays(maturity)
-                .status(CropPlantingStatus.PLANNED)
-                .build();
+                .field(field).cropType(cropType).cropArea(request.cropArea())
+                .plantedOn(request.plantedOn()).expectedHarvestOn(expectedHarvest)
+                .maturityTimeInDays(maturity).status(CropPlantingStatus.PLANNED).build();
 
         CropPlanting saved = plantingRepository.save(planting);
         field.getCrops().add(saved);
-
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(cropPlantingMapper.toResponse(saved));
+        return ResponseEntity.status(HttpStatus.CREATED).body(cropPlantingMapper.toResponse(saved));
     }
 
     @Transactional(readOnly = true)
     public ResponseEntity<List<CropPlantingResponse>> getAll(String email) {
-        return ResponseEntity.ok(
-                plantingRepository.findAllByField_Farm_Owner_Email(email)
-                        .stream().map(cropPlantingMapper::toResponse).toList());
+        return ResponseEntity.ok(plantingRepository.findAllByField_Farm_Owner_Email(email)
+                .stream().map(cropPlantingMapper::toResponse).toList());
     }
 
     @Transactional(readOnly = true)
@@ -79,9 +71,8 @@ public class CropPlantingService {
         if (fieldRepo.findByIdAndFarm_Owner_Email(fieldId, email).isEmpty()) {
             throw notFound("Field not found");
         }
-        return ResponseEntity.ok(
-                plantingRepository.findAllByField_IdAndField_Farm_Owner_Email(fieldId, email)
-                        .stream().map(cropPlantingMapper::toResponse).toList());
+        return ResponseEntity.ok(plantingRepository.findAllByField_IdAndField_Farm_Owner_Email(fieldId, email)
+                .stream().map(cropPlantingMapper::toResponse).toList());
     }
 
     @Transactional(readOnly = true)
@@ -92,63 +83,49 @@ public class CropPlantingService {
     }
 
     @Transactional
-    public ResponseEntity<CropPlantingResponse> update(Long id, String email,
-                                                       CropPlantingRequest request) {
+    public ResponseEntity<CropPlantingResponse> update(Long id, String email, CropPlantingRequest request) {
         CropPlanting planting = getPlanting(id, email);
         if (isTerminal(planting.getStatus())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "Completed or cancelled plantings cannot be updated");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Completed or cancelled plantings cannot be updated");
         }
 
         Field field = getLockedField(planting.getField().getId(), email);
         BigDecimal difference = request.cropArea().subtract(planting.getCropArea());
         if (difference.compareTo(field.getAvailableArea()) > 0) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "Insufficient available field area");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Insufficient available field area");
         }
 
         CropType cropType = getCropType(field, request.cropTypeId(), email);
         int maturity = resolveMaturity(request, cropType);
         validateDates(request.plantedOn(), request.expectedHarvestOn());
-
         LocalDate expectedHarvest = request.expectedHarvestOn() != null
-                ? request.expectedHarvestOn()
-                : request.plantedOn().plusDays(maturity);
+                ? request.expectedHarvestOn() : request.plantedOn().plusDays(maturity);
 
         planting.setCropType(cropType);
         planting.setCropArea(request.cropArea());
         planting.setPlantedOn(request.plantedOn());
         planting.setExpectedHarvestOn(expectedHarvest);
         planting.setMaturityTimeInDays(maturity);
-
-        return ResponseEntity.ok(cropPlantingMapper.toResponse(
-                plantingRepository.save(planting)));
+        return ResponseEntity.ok(cropPlantingMapper.toResponse(plantingRepository.save(planting)));
     }
 
     @Transactional
-    public ResponseEntity<CropPlantingResponse> updateStatus(Long id, String email,
-                                                             CropPlantingStatus newStatus) {
+    public ResponseEntity<CropPlantingResponse> updateStatus(Long id, String email, CropPlantingStatus newStatus) {
         CropPlanting planting = getPlanting(id, email);
         CropPlantingStatus oldStatus = planting.getStatus();
-
         if (!isAllowedTransition(oldStatus, newStatus)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Invalid planting status transition");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid planting status transition");
         }
 
-        // Serialize valid lifecycle changes against field-area allocations
-        // and other planting status changes for the same field.
+        // Serialize valid lifecycle changes against field-area allocations and other planting status changes.
         getLockedField(planting.getField().getId(), email);
-
         planting.setStatus(newStatus);
         if (newStatus == CropPlantingStatus.COMPLETED) {
             planting.setCompletedOn(LocalDate.now());
         } else if (newStatus == CropPlantingStatus.CANCELLED) {
             planting.setCompletedOn(null);
         }
-
-        return ResponseEntity.ok(cropPlantingMapper.toResponse(
-                plantingRepository.save(planting)));
+        return ResponseEntity.ok(cropPlantingMapper.toResponse(plantingRepository.save(planting)));
     }
 
     @Transactional
@@ -157,6 +134,12 @@ public class CropPlantingService {
         if (planting.getStatus() != CropPlantingStatus.PLANNED) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "Only planned plantings can be deleted; cancel active plantings instead");
+        }
+        if (expenseRepository.existsByCropPlanting_Id(id)
+                || harvestRecordRepository.existsByCropPlanting_Id(id)
+                || activityLogRepository.existsByCropPlanting_Id(id)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Planting cannot be deleted while expense, harvest, or activity history exists");
         }
 
         Field field = getLockedField(planting.getField().getId(), email);
@@ -176,15 +159,13 @@ public class CropPlantingService {
     }
 
     private CropType getCropType(Field field, Long cropTypeId, String email) {
-        return cropTypeRepository
-                .findByIdAndFarm_IdAndFarm_Owner_Email(cropTypeId, field.getFarm().getId(), email)
+        return cropTypeRepository.findByIdAndFarm_IdAndFarm_Owner_Email(cropTypeId, field.getFarm().getId(), email)
                 .orElseThrow(() -> notFound("Crop type not found in this farm"));
     }
 
     private int resolveMaturity(CropPlantingRequest request, CropType cropType) {
         Integer maturity = request.maturityTimeInDays() != null
-                ? request.maturityTimeInDays()
-                : cropType.getDefaultMaturityTimeInDays();
+                ? request.maturityTimeInDays() : cropType.getDefaultMaturityTimeInDays();
         if (maturity == null || maturity <= 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Provide maturity days or configure a crop type default");
@@ -203,16 +184,12 @@ public class CropPlantingService {
         return status == CropPlantingStatus.COMPLETED || status == CropPlantingStatus.CANCELLED;
     }
 
-    private boolean isAllowedTransition(CropPlantingStatus oldStatus,
-                                        CropPlantingStatus newStatus) {
+    private boolean isAllowedTransition(CropPlantingStatus oldStatus, CropPlantingStatus newStatus) {
         return switch (oldStatus) {
-            case PLANNED -> newStatus == CropPlantingStatus.ACTIVE
-                    || newStatus == CropPlantingStatus.CANCELLED;
+            case PLANNED -> newStatus == CropPlantingStatus.ACTIVE || newStatus == CropPlantingStatus.CANCELLED;
             case ACTIVE -> newStatus == CropPlantingStatus.HARVESTING
-                    || newStatus == CropPlantingStatus.COMPLETED
-                    || newStatus == CropPlantingStatus.CANCELLED;
-            case HARVESTING -> newStatus == CropPlantingStatus.COMPLETED
-                    || newStatus == CropPlantingStatus.CANCELLED;
+                    || newStatus == CropPlantingStatus.COMPLETED || newStatus == CropPlantingStatus.CANCELLED;
+            case HARVESTING -> newStatus == CropPlantingStatus.COMPLETED || newStatus == CropPlantingStatus.CANCELLED;
             case COMPLETED, CANCELLED -> false;
         };
     }
