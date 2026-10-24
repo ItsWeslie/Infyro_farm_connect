@@ -7,4 +7,5 @@ import java.time.LocalDate;
 
 public record ExpenseResponse(Long id, Long farmId, Long cropPlantingId,
         BigDecimal amount, LocalDate expenseDate, ExpenseCategory category,
-        String description, Instant createdAt, Instant updatedAt) {}
+        String description, Instant createdAt, Instant updatedAt,
+        boolean voided, Instant voidedAt, String voidReason) {}
