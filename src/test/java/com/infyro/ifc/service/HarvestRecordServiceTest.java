@@ -4,6 +4,8 @@ import com.infyro.ifc.dto.harvest.HarvestRecordRequest;
 import com.infyro.ifc.enums.CropPlantingStatus;
 import com.infyro.ifc.enums.HarvestUnit;
 import com.infyro.ifc.model.CropPlanting;
+import com.infyro.ifc.model.HarvestRecord;
+import com.infyro.ifc.dto.harvest.HarvestRecordResponse;
 import com.infyro.ifc.repository.CropPlantingRepo;
 import com.infyro.ifc.repository.HarvestRecordRepository;
 import org.junit.jupiter.api.Test;
@@ -20,6 +22,8 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -61,6 +65,63 @@ class HarvestRecordServiceTest {
                 () -> service.create(4L, "owner@example.com", request(LocalDate.of(2026, 3, 1))));
         assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
         verify(records, never()).save(any());
+    }
+
+    @Test
+    void allowsValidHarvestForActivePlanting() {
+        LocalDate harvestDate = LocalDate.of(2026, 4, 10);
+        CropPlanting planting = CropPlanting.builder().id(4L)
+                .plantedOn(LocalDate.of(2026, 1, 10))
+                .expectedHarvestOn(harvestDate)
+                .status(CropPlantingStatus.ACTIVE).build();
+
+        when(plantings.findByIdAndField_Farm_Owner_Email(4L, "owner@example.com"))
+                .thenReturn(Optional.of(planting));
+        when(records.save(any(HarvestRecord.class))).thenAnswer(invocation -> {
+            HarvestRecord record = invocation.getArgument(0);
+            record.setId(55L);
+            return record;
+        });
+
+        HarvestRecordResponse response = service.create(
+                4L, "owner@example.com", request(harvestDate));
+
+        assertEquals(55L, response.id());
+        assertEquals(4L, response.cropPlantingId());
+        verify(records).save(any(HarvestRecord.class));
+    }
+
+    @Test
+    void rejectsReadingHarvestOwnedByAnotherUser() {
+        when(records.findByIdAndCropPlanting_Field_Farm_Owner_Email(
+                55L, "attacker@example.com")).thenReturn(Optional.empty());
+
+        assertThrows(ResponseStatusException.class,
+                () -> service.getById(55L, "attacker@example.com"));
+    }
+
+    @Test
+    void rejectsDeletingHarvestOwnedByAnotherUser() {
+        when(records.findByIdAndCropPlanting_Field_Farm_Owner_Email(
+                55L, "attacker@example.com")).thenReturn(Optional.empty());
+
+        assertThrows(ResponseStatusException.class,
+                () -> service.delete(55L, "attacker@example.com"));
+
+        verify(records, never()).delete(any(HarvestRecord.class));
+    }
+
+    @Test
+    void rejectsListingRecordsForUnownedPlanting() {
+        when(plantings.findByIdAndField_Farm_Owner_Email(
+                4L, "attacker@example.com")).thenReturn(Optional.empty());
+
+        assertThrows(ResponseStatusException.class,
+                () -> service.list(4L, "attacker@example.com"));
+
+        verify(records, never())
+                .findAllByCropPlanting_IdAndCropPlanting_Field_Farm_Owner_EmailOrderByHarvestDateDescCreatedAtDesc(
+                        anyLong(), anyString());
     }
 
     private HarvestRecordRequest request(LocalDate date) {
