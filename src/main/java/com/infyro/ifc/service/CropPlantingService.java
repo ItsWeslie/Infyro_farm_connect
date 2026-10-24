@@ -148,16 +148,25 @@ public class CropPlantingService {
                 cropPlantingMapper.toResponse(plantingRepository.save(planting)));
     }
 
+
     @Transactional
-    public ResponseEntity<CropPlantingResponse> updateStatus(Long id,
-                                                             String email,
+    public ResponseEntity<CropPlantingResponse> updateStatus(Long id, String email,
                                                              CropPlantingStatus newStatus) {
 
         CropPlanting planting = getPlanting(id, email);
         CropPlantingStatus oldStatus = planting.getStatus();
 
+        // Validate before changing field area.
+        if (!isAllowedTransition(oldStatus, newStatus)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Invalid planting status transition");
+        }
+
+        // Restore reserved area exactly once when the planting ends.
         if (isTerminal(newStatus)) {
             Field field = getLockedField(planting.getField().getId(), email);
+
             field.setAvailableArea(
                     field.getAvailableArea().add(planting.getCropArea()));
 
@@ -166,24 +175,13 @@ public class CropPlantingService {
             }
         }
 
-        if (!isAllowedTransition(oldStatus, newStatus)) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Invalid planting status transition");
-        }
-
-        if (isTerminal(newStatus)) {
-            Field field = getLockedField(planting.getField().getId(), email);
-            field.setAvailableArea(
-                    field.getAvailableArea().add(planting.getCropArea()));
-            planting.setCompletedOn(LocalDate.now());
-        }
-
         planting.setStatus(newStatus);
 
         return ResponseEntity.ok(
-                cropPlantingMapper.toResponse(plantingRepository.save(planting)));
+                cropPlantingMapper.toResponse(
+                        plantingRepository.save(planting)));
     }
+
 
     @Transactional
     public ResponseEntity<APIResponse> delete(Long id, String email) {

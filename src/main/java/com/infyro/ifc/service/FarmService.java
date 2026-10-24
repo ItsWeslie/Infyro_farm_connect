@@ -49,20 +49,19 @@ public class FarmService {
     }
 
 
+
     @Transactional(readOnly = true)
-    public ResponseEntity<FarmResponse> getFarmByID(Long id,String Email) {
+    public ResponseEntity<FarmResponse> getFarmByID(Long id, String Email) {
 
         Farm farm = farmRepo.findByIdAndOwner_Email(id, Email)
-                .orElseThrow(()-> new FarmNotFoundException("Farm not found with ID: "+id));
+                .orElseThrow(() ->
+                        new FarmNotFoundException("Farm not found with ID: " + id));
 
-        FarmResponse response = FarmResponse.builder()
-                .id(farm.getId())
-                .name(farm.getFarmName())
-                .fields(farm.getFields())
-                .build();
+        FarmResponse response = farmMapper.mapToFarmResponse(farm);
 
         return ResponseEntity.ok(response);
     }
+
 
     @Transactional(readOnly = true)
     public ResponseEntity<List<FarmResponse>> getFarmsByOwner(String email) {

@@ -1,6 +1,6 @@
 package com.infyro.ifc.dto.farm;
 
-import com.infyro.ifc.model.Field;
+import com.infyro.ifc.dto.field.FieldResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,5 +15,5 @@ import java.util.List;
 public class FarmResponse {
     private Long id;
     private String name;
-    private List<Field> fields;
+    private List<FieldResponse> fields;
 }

@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface CropPlantingRepo extends JpaRepository<CropPlanting, Integer> {
+public interface CropPlantingRepo extends JpaRepository<CropPlanting, Long> {
     boolean existsByCropType_Id(Long cropTypeId);
 
     List<CropPlanting> findAllByField_Farm_Owner_Email(String email);
