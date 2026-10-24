@@ -34,6 +34,15 @@ public class Field {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal totalArea;
 
+    /*
+     * Compatibility column for databases created before area was derived.
+     * It is not used to calculate available area and should be removed by a
+     * database migration after existing installations have migrated.
+     */
+    @Deprecated
+    @Column(name = "availableArea", nullable = false, precision = 10, scale = 2)
+    private BigDecimal legacyAvailableArea;
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
@@ -46,22 +55,13 @@ public class Field {
     private Long version;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            referencedColumnName = "id",
-            name = "farm_id",
-            nullable = false
-    )
+    @JoinColumn(name = "farm_id", nullable = false)
     private Farm farm;
 
     @Builder.Default
     @OneToMany(mappedBy = "field", fetch = FetchType.LAZY)
     private List<CropPlanting> crops = new ArrayList<>();
 
-    /**
-     * Available area is derived from current planting allocations.
-     * PLANNED plantings reserve area immediately; completed/cancelled
-     * plantings no longer consume capacity.
-     */
     @Transient
     public BigDecimal getAvailableArea() {
         BigDecimal reservedArea = crops == null ? BigDecimal.ZERO :
