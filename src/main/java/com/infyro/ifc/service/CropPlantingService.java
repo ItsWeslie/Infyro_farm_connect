@@ -131,6 +131,10 @@ public class CropPlantingService {
         CropPlanting planting = getPlanting(id, email);
         CropPlantingStatus oldStatus = planting.getStatus();
 
+        // Serialize lifecycle changes with allocations on the same field row.
+        // This keeps area release/reservation changes ordered with create/update.
+        getLockedField(planting.getField().getId(), email);
+
         if (!isAllowedTransition(oldStatus, newStatus)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Invalid planting status transition");
