@@ -1,6 +1,7 @@
 package com.infyro.ifc.service;
 
 import com.infyro.ifc.dto.expense.ExpenseRequest;
+import com.infyro.ifc.dto.expense.ExpenseResponse;
 import com.infyro.ifc.enums.ExpenseCategory;
 import com.infyro.ifc.model.*;
 import com.infyro.ifc.repository.*;
