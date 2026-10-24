@@ -5,6 +5,9 @@ import com.infyro.ifc.mapper.CropPlantingMapper;
 import com.infyro.ifc.model.CropPlanting;
 import com.infyro.ifc.model.Field;
 import com.infyro.ifc.repository.CropPlantingRepo;
+import com.infyro.ifc.repository.CropActivityLogRepository;
+import com.infyro.ifc.repository.ExpenseRepository;
+import com.infyro.ifc.repository.HarvestRecordRepository;
 import com.infyro.ifc.repository.CropTypeRepository;
 import com.infyro.ifc.repository.FieldRepo;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,6 +43,10 @@ class CropPlantingServiceTest {
 
     @Mock
     private CropPlantingMapper cropPlantingMapper;
+
+    @Mock private ExpenseRepository expenseRepository;
+    @Mock private HarvestRecordRepository harvestRecordRepository;
+    @Mock private CropActivityLogRepository activityLogRepository;
 
     @InjectMocks
     private CropPlantingService service;
@@ -139,5 +146,41 @@ class CropPlantingServiceTest {
                 .findOwnedFieldForUpdate(anyLong(), anyString());
 
         verify(plantingRepository, never()).save(any(CropPlanting.class));
+    }
+
+    @Test
+    void refusesDeletingPlantingWithExpenseHistory() {
+        when(expenseRepository.existsByCropPlanting_Id(PLANTING_ID)).thenReturn(true);
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> service.delete(PLANTING_ID, EMAIL));
+
+        assertEquals(409, exception.getStatusCode().value());
+        verify(plantingRepository, never()).delete(any(CropPlanting.class));
+    }
+
+    @Test
+    void refusesDeletingPlantingWithHarvestHistory() {
+        when(expenseRepository.existsByCropPlanting_Id(PLANTING_ID)).thenReturn(false);
+        when(harvestRecordRepository.existsByCropPlanting_Id(PLANTING_ID)).thenReturn(true);
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> service.delete(PLANTING_ID, EMAIL));
+
+        assertEquals(409, exception.getStatusCode().value());
+        verify(plantingRepository, never()).delete(any(CropPlanting.class));
+    }
+
+    @Test
+    void refusesDeletingPlantingWithActivityHistory() {
+        when(expenseRepository.existsByCropPlanting_Id(PLANTING_ID)).thenReturn(false);
+        when(harvestRecordRepository.existsByCropPlanting_Id(PLANTING_ID)).thenReturn(false);
+        when(activityLogRepository.existsByCropPlanting_Id(PLANTING_ID)).thenReturn(true);
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> service.delete(PLANTING_ID, EMAIL));
+
+        assertEquals(409, exception.getStatusCode().value());
+        verify(plantingRepository, never()).delete(any(CropPlanting.class));
     }
 }

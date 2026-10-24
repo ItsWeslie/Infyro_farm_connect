@@ -15,4 +15,6 @@ public interface CropActivityLogRepository extends JpaRepository<CropActivityLog
 
     Optional<CropActivityLog> findByIdAndCropPlanting_Field_Farm_Owner_Email(
             Long id, String email);
+
+    boolean existsByCropPlanting_Id(Long plantingId);
 }
