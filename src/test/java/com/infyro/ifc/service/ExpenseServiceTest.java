@@ -19,6 +19,8 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -53,6 +55,39 @@ class ExpenseServiceTest {
                 () -> service.create(10L, "owner@example.com", request));
         assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
         verify(expenses, never()).save(any());
+    }
+
+    @Test
+    void rejectsReadingExpenseOwnedByAnotherUser() {
+        when(expenses.findByIdAndFarm_Owner_Email(99L, "attacker@example.com"))
+                .thenReturn(Optional.empty());
+
+        assertThrows(ResponseStatusException.class,
+                () -> service.getById(99L, "attacker@example.com"));
+    }
+
+    @Test
+    void rejectsDeletingExpenseOwnedByAnotherUser() {
+        when(expenses.findByIdAndFarm_Owner_Email(99L, "attacker@example.com"))
+                .thenReturn(Optional.empty());
+
+        assertThrows(ResponseStatusException.class,
+                () -> service.delete(99L, "attacker@example.com"));
+
+        verify(expenses, never()).delete(any(Expense.class));
+    }
+
+    @Test
+    void rejectsListingExpensesForUnownedFarm() {
+        when(farms.findByIdAndOwner_Email(10L, "attacker@example.com"))
+                .thenReturn(Optional.empty());
+
+        assertThrows(ResponseStatusException.class,
+                () -> service.listByFarm(10L, "attacker@example.com"));
+
+        verify(expenses, never())
+                .findAllByFarm_IdAndFarm_Owner_EmailOrderByExpenseDateDescCreatedAtDesc(
+                        anyLong(), anyString());
     }
 
     @Test
