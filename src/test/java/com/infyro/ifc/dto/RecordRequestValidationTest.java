@@ -67,6 +67,20 @@ class RecordRequestValidationTest {
     }
 
     @Test
+    void rejectsExpenseAmountWithMoreThanTwoDecimalPlaces() {
+        ExpenseRequest request = new ExpenseRequest(null, new BigDecimal("10.123"), LocalDate.now(),
+                ExpenseCategory.OTHER, "Supplies");
+        assertFalse(validator.validate(request).isEmpty());
+    }
+
+    @Test
+    void rejectsHarvestQuantityWithMoreThanThreeDecimalPlaces() {
+        HarvestRecordRequest request = new HarvestRecordRequest(LocalDate.now(), new BigDecimal("2.1234"),
+                HarvestUnit.KILOGRAM, "Harvest");
+        assertFalse(validator.validate(request).isEmpty());
+    }
+
+    @Test
     void acceptsValidExpenseRequest() {
         ExpenseRequest request = new ExpenseRequest(null, new BigDecimal("100.00"), LocalDate.now(),
                 ExpenseCategory.OTHER, "Seeds");
