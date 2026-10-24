@@ -37,6 +37,15 @@ public class HarvestRecord {
     @Column(length = 2000)
     private String notes;
 
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean voided = false;
+
+    private Instant voidedAt;
+
+    @Column(length = 500)
+    private String voidReason;
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
