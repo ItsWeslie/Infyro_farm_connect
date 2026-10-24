@@ -1,0 +1,13 @@
+package com.infyro.ifc.enums;
+
+public enum CropStage {
+    LAND_PREPARATION,
+    SOWING_OR_TRANSPLANTING,
+    GERMINATION,
+    VEGETATIVE_GROWTH,
+    FLOWERING,
+    FRUITING_OR_GRAIN_FILLING,
+    MATURITY,
+    HARVEST,
+    OTHER
+}
