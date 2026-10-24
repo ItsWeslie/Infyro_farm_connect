@@ -89,6 +89,15 @@ public class CropPlantingService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Completed or cancelled plantings cannot be updated");
         }
 
+        if (harvestRecordRepository.existsByCropPlanting_Id(id)) {
+            boolean plantingDateChanged = !planting.getPlantedOn().equals(request.plantedOn());
+            boolean cropChanged = !planting.getCropType().getId().equals(request.cropTypeId());
+            if (plantingDateChanged || cropChanged) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                        "Planting date and crop type cannot be changed after harvest history exists");
+            }
+        }
+
         Field field = getLockedField(planting.getField().getId(), email);
         BigDecimal difference = request.cropArea().subtract(planting.getCropArea());
         if (difference.compareTo(field.getAvailableArea()) > 0) {
