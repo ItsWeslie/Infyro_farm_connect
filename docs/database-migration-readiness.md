@@ -1,28 +1,17 @@
-# Database migration readiness
+# Database migrations
 
-## Current repository findings
+The application uses Flyway to manage the development MySQL schema. Versioned SQL scripts live under `src/main/resources/db/migration`.
 
-- The application has JPA entities for users, farms, fields, crop types, crop plantings, crop activity logs, expenses, and harvest records.
-- The project has a MySQL JDBC driver and H2 for tests, but no Flyway or Liquibase dependency.
-- No checked-in production `application.properties` / YAML configuration or existing migration scripts were found on `main`.
-- The test profile configures H2 with `spring.jpa.hibernate.ddl-auto=create-drop`; this creates a test schema from entities and does not validate an upgrade of an existing MySQL database.
-- `Field` retains a deprecated `availableArea` compatibility column. Its entity comment explicitly says it should be removed by a migration after existing installations have migrated. Removing it in the first migration without verifying existing deployments would be unsafe.
-- The expense and harvest entities map to `expenses` and `harvest_records`, with foreign keys to `farms` and `crop_plantings`. They also have audit/void columns and indexes that need to be represented in SQL.
+## Local setup
 
-## Why a schema migration is not added yet
+1. Start MySQL and create an empty database named `infyro_farm_connect`.
+2. Set `DB_URL`, `DB_USERNAME`, and `DB_PASSWORD` if your local connection differs from the defaults.
+3. Start the application. Flyway applies pending migrations before Hibernate validates the entity mappings.
 
-There is no checked-in canonical schema or migration history to establish which tables and columns already exist in deployed databases. A single migration that creates all tables may fail on existing installations; a migration that creates only expense and harvest tables may fail on a fresh database or if the existing table/column names differ. Enabling Flyway without an explicit baseline strategy could also make Flyway reject a non-empty database or mark it as already migrated without applying required changes.
+The initial migration creates the schema represented by the current JPA entities, including expense and harvest records. It preserves the `fields.available_area` compatibility column because the current `Field` entity still maps it.
 
-## Safe next steps
+## Existing development databases
 
-1. Obtain a schema-only dump from the target MySQL database (for example, `mysqldump --no-data`) and confirm whether any environment has existing data. Do not share credentials or production data.
-2. Compare that schema with the JPA entity mappings, including table/column names, indexes, unique constraints, foreign keys, and the legacy `fields.availableArea` column.
-3. Choose an adoption plan:
-   - **Fresh database only:** add a complete initial Flyway migration for all mapped tables, then use Flyway for subsequent changes.
-   - **Existing database:** create a verified baseline matching the deployed schema, baseline existing installations at that version, and add a later migration for expense/harvest tables and indexes.
-4. Keep Hibernate schema mutation disabled in production once migrations own schema changes; use schema validation instead.
-5. Test both a fresh MySQL-compatible schema and an upgrade from a representative existing schema before deploying.
+This initial migration is intended for a new, empty development database. If you already have a local database created by Hibernate, back it up first. Do not run Flyway against a non-empty schema that has no Flyway history without deliberately choosing and verifying a baseline procedure. For a disposable development database, the simplest clean start is to drop and recreate the empty schema, then restart the application.
 
-## Safety rule
-
-Do not drop or rename legacy columns, or baseline a production database, until the actual deployed schema and data-retention requirements have been checked.
+Tests use H2 with Hibernate `create-drop` and disable Flyway; they validate application behavior, not the MySQL migration itself. Before relying on this migration, run it against a local MySQL instance and verify startup completes with `ddl-auto=validate`.
