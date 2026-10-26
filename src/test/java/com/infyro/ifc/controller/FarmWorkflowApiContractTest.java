@@ -45,7 +45,7 @@ class FarmWorkflowApiContractTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {"cropPlantingId":31,"amount":125.50,"expenseDate":"2026-10-20",
-                                 "category":"SEEDS","description":"  Seed purchase  "}
+                                 "category":"SEEDS_AND_SEEDLINGS","description":"  Seed purchase  "}
                                 """))
                 .andExpect(status().isCreated());
 
@@ -59,7 +59,7 @@ class FarmWorkflowApiContractTest {
                         .principal((Principal) () -> "owner@example.com")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"harvestDate":"2026-10-20","quantity":12.500,"unit":"KG","notes":"First pick"}
+                                {"harvestDate":"2026-10-20","quantity":12.500,"unit":"KILOGRAM","notes":"First pick"}
                                 """))
                 .andExpect(status().isCreated());
 
@@ -70,7 +70,7 @@ class FarmWorkflowApiContractTest {
     @Test
     void cancellingExpenseReturnsNoContentAndUsesAuthenticatedOwner() throws Exception {
         when(expenseService.getById(41L, "owner@example.com"))
-                .thenReturn(null);
+                .thenReturn(new ExpenseResponse(41L, 12L, null, null, null, null, null, null, null, false, "Active", null, null));
         expenseMvc.perform(delete("/api/farms/12/expenses/41")
                         .principal((Principal) () -> "owner@example.com"))
                 .andExpect(status().isNoContent());
@@ -83,7 +83,7 @@ class FarmWorkflowApiContractTest {
     @Test
     void cancellingHarvestReturnsNoContentAndUsesAuthenticatedOwner() throws Exception {
         when(harvestService.getById(51L, "owner@example.com"))
-                .thenReturn(null);
+                .thenReturn(new HarvestRecordResponse(51L, 31L, null, null, null, null, null, null, false, "Active", null, null));
         harvestMvc.perform(delete("/api/crop-plantings/31/harvest-records/51")
                         .principal((Principal) () -> "owner@example.com"))
                 .andExpect(status().isNoContent());
