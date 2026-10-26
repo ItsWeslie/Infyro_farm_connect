@@ -72,11 +72,11 @@ public class HarvestRecordService {
         HarvestRecord record = records.findByIdAndCropPlanting_Field_Farm_Owner_Email(id, email)
                 .orElseThrow(() -> notFound("Harvest record not found"));
         if (record.isVoided()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Harvest record is already voided");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Harvest record is already cancelled");
         }
         record.setVoided(true);
         record.setVoidedAt(Instant.now());
-        record.setVoidReason("Voided by owner; create a replacement harvest record to correct this entry");
+        record.setVoidReason("Cancelled by owner; create a replacement harvest record to correct this entry");
         records.save(record);
     }
 
@@ -89,7 +89,8 @@ public class HarvestRecordService {
         return new HarvestRecordResponse(record.getId(), record.getCropPlanting().getId(),
                 record.getHarvestDate(), record.getQuantity(), record.getUnit(),
                 record.getNotes(), record.getCreatedAt(), record.getUpdatedAt(),
-                record.isVoided(), record.getVoidedAt(), record.getVoidReason());
+                record.isVoided(), record.isVoided() ? "Cancelled" : "Active",
+                record.getVoidedAt(), record.getVoidReason());
     }
 
     private ResponseStatusException notFound(String message) {
