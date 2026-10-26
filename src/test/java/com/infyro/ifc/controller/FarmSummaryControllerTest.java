@@ -8,32 +8,32 @@ import com.infyro.ifc.enums.CropPlantingStatus;
 import com.infyro.ifc.enums.ExpenseCategory;
 import com.infyro.ifc.enums.HarvestUnit;
 import com.infyro.ifc.service.FarmSummaryService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Map;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
-@WebMvcTest(FarmSummaryController.class)
-@AutoConfigureMockMvc(addFilters = false)
 class FarmSummaryControllerTest {
 
-    @Autowired
+    private FarmSummaryService service;
     private MockMvc mockMvc;
 
-    @MockitoBean
-    private FarmSummaryService service;
+    @BeforeEach
+    void setUp() {
+        service = mock(FarmSummaryService.class);
+        mockMvc = standaloneSetup(new FarmSummaryController(service)).build();
+    }
 
     @Test
     void farmSummaryEndpointReturnsSummaryContract() throws Exception {
