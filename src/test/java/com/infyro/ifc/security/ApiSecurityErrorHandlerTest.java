@@ -38,7 +38,7 @@ class ApiSecurityErrorHandlerTest {
     }
 
     @Test
-    void forbiddenRequestGetsStructuredJson403() throws IOException {
+    void forbiddenRequestGetsStructuredJson403() throws IOException, ServletException {
         AccessDeniedHandler handler = config.apiAccessDeniedHandler(objectMapper);
         MockHttpServletResponse response = new MockHttpServletResponse();
 
