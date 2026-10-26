@@ -1,6 +1,7 @@
 package com.infyro.ifc.service;
 
 import com.infyro.ifc.mapper.FarmMapper;
+import com.infyro.ifc.exception.FarmNotFoundException;
 import com.infyro.ifc.repository.ExpenseRepository;
 import com.infyro.ifc.repository.FarmRepo;
 import com.infyro.ifc.repository.HarvestRecordRepository;
@@ -24,6 +25,18 @@ class FarmServiceTest {
     @Mock ExpenseRepository expenseRepository;
     @Mock HarvestRecordRepository harvestRecordRepository;
     @InjectMocks FarmService service;
+
+    @Test
+    void hidesFarmOwnedByAnotherUserAsNotFound() {
+        when(farmRepo.findByIdAndOwner_Email(42L, "other-user@example.com"))
+                .thenReturn(java.util.Optional.empty());
+
+        assertThrows(FarmNotFoundException.class,
+                () -> service.getFarmByID(42L, "other-user@example.com"));
+
+        verify(farmRepo).findByIdAndOwner_Email(42L, "other-user@example.com");
+        verifyNoInteractions(farmMapper);
+    }
 
     @Test
     void refusesDeletingFarmWithExpenseHistory() {
