@@ -54,11 +54,11 @@ public class ExpenseService {
         Expense expense = expenses.findByIdAndFarm_Owner_Email(id, email)
                 .orElseThrow(() -> notFound("Expense not found"));
         if (expense.isVoided()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Expense is already voided");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Expense is already cancelled");
         }
         expense.setVoided(true);
         expense.setVoidedAt(Instant.now());
-        expense.setVoidReason("Voided by owner; create a replacement expense to correct this entry");
+        expense.setVoidReason("Cancelled by owner; create a replacement expense to correct this entry");
         expenses.save(expense);
     }
 
@@ -66,7 +66,8 @@ public class ExpenseService {
         return new ExpenseResponse(e.getId(), e.getFarm().getId(),
                 e.getCropPlanting() == null ? null : e.getCropPlanting().getId(),
                 e.getAmount(), e.getExpenseDate(), e.getCategory(), e.getDescription(),
-                e.getCreatedAt(), e.getUpdatedAt(), e.isVoided(), e.getVoidedAt(), e.getVoidReason());
+                e.getCreatedAt(), e.getUpdatedAt(), e.isVoided(),
+                e.isVoided() ? "Cancelled" : "Active", e.getVoidedAt(), e.getVoidReason());
     }
     private ResponseStatusException notFound(String message) {
         return new ResponseStatusException(HttpStatus.NOT_FOUND, message);
