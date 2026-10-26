@@ -1,6 +1,7 @@
 package com.infyro.ifc.security;
 
 import com.infyro.ifc.api.APIConstants;
+import com.infyro.ifc.exception.UserNotFoundException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,6 +12,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -35,52 +37,61 @@ public class JWTFilter extends OncePerRequestFilter {
             return;
         }
 
-        String token = null;
-        String userName = null;
-
-        String authHeader = request.getHeader("Authorization");
-
-        if(authHeader != null && authHeader.startsWith("Bearer ")){
-            token = authHeader.substring(7);
+        String token = extractToken(request);
+        if (token != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            authenticateToken(token, request);
         }
 
-        if (token == null && request.getCookies() != null) {
+        filterChain.doFilter(request, response);
+    }
+
+    private String extractToken(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
+        }
+
+        if (request.getCookies() != null) {
             for (var cookie : request.getCookies()) {
                 if ("access_token".equals(cookie.getName())) {
-                    token = cookie.getValue();
-                    break;
+                    return cookie.getValue();
                 }
             }
         }
+        return null;
+    }
 
-        if (token != null) {
-            try {
-                userName = jwtService.extractUsername(token);
-            } catch (Exception e) {
-                log.error(e.getMessage());
-            }
+    private void authenticateToken(String token, HttpServletRequest request) {
+        final String username;
+        try {
+            username = jwtService.extractUsername(token);
+        } catch (RuntimeException exception) {
+            // Invalid/expired tokens should remain unauthenticated and be handled by Spring Security.
+            log.debug("Ignoring an invalid access token");
+            SecurityContextHolder.clearContext();
+            return;
         }
 
-        if(userName != null && SecurityContextHolder.getContext().getAuthentication() == null)
-        {
-            UserDetails userDetails = context
-                    .getBean(UsersDetailService.class)
-                    .loadUserByUsername(userName);
+        if (username == null || username.isBlank()) {
+            SecurityContextHolder.clearContext();
+            return;
+        }
 
-            if(jwtService.validateToken(token, userDetails)){
-
-                UsernamePasswordAuthenticationToken authToken =
+        try {
+            UserDetails userDetails = context.getBean(UsersDetailService.class).loadUserByUsername(username);
+            if (jwtService.validateToken(token, userDetails)) {
+                UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities()
-                        );
-
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                                userDetails, null, userDetails.getAuthorities());
+                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            } else {
+                SecurityContextHolder.clearContext();
             }
+        } catch (UsernameNotFoundException | UserNotFoundException exception) {
+            // A token for a deleted/unknown account must not escape the filter as a 500.
+            log.debug("Ignoring an access token for an unknown account");
+            SecurityContextHolder.clearContext();
         }
-        filterChain.doFilter(request, response);
     }
 }
