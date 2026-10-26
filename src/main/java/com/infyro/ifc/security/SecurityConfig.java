@@ -1,6 +1,6 @@
 package com.infyro.ifc.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import com.infyro.ifc.api.APIConstants;
 import com.infyro.ifc.dto.ApiErrorResponse;
 import lombok.RequiredArgsConstructor;
