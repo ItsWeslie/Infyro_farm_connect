@@ -15,7 +15,7 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class CropPlantingEventProvider implements CalendarEventProvider {
-    private static final List<CropPlantingStatus> REMINDER_ELIGIBLE_STATUSES =
+    private static final List<CropPlantingStatus> HARVEST_REMINDER_STATUSES =
             List.of(CropPlantingStatus.PLANNED, CropPlantingStatus.ACTIVE, CropPlantingStatus.HARVESTING);
 
     private final CropPlantingRepository cropPlantingRepository;
@@ -48,14 +48,25 @@ public class CropPlantingEventProvider implements CalendarEventProvider {
 
     @Override
     public List<ReminderCandidate> findReminderCandidates(LocalDate eventDate) {
-        return cropPlantingRepository.findHarvestReminders(eventDate, REMINDER_ELIGIBLE_STATUSES)
+        return cropPlantingRepository.findReminderCandidates(
+                        eventDate, CropPlantingStatus.PLANNED, HARVEST_REMINDER_STATUSES)
                 .stream()
-                .map(planting -> new ReminderCandidate(
-                        planting.getField().getFarm().getOwner().getId(),
-                        eventKey(planting.getId(), "HARVEST"),
-                        "HARVEST",
-                        planting.getCropType().getName() + " harvest is scheduled for tomorrow",
-                        planting.getExpectedHarvestOn()))
+                .flatMap(planting -> {
+                    List<ReminderCandidate> candidates = new ArrayList<>(2);
+                    Long ownerId = planting.getField().getFarm().getOwner().getId();
+                    String cropName = planting.getCropType().getName();
+                    if (planting.getStatus() == CropPlantingStatus.PLANNED
+                            && eventDate.equals(planting.getPlantedOn())) {
+                        candidates.add(new ReminderCandidate(ownerId, eventKey(planting.getId(), "PLANTING"),
+                                "PLANTING", cropName + " planting is scheduled for tomorrow", eventDate));
+                    }
+                    if (planting.getStatus() != CropPlantingStatus.CANCELLED
+                            && eventDate.equals(planting.getExpectedHarvestOn())) {
+                        candidates.add(new ReminderCandidate(ownerId, eventKey(planting.getId(), "HARVEST"),
+                                "HARVEST", cropName + " harvest is scheduled for tomorrow", eventDate));
+                    }
+                    return candidates.stream();
+                })
                 .toList();
     }
 
