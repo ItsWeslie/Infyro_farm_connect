@@ -2,12 +2,13 @@ package com.infyro.ifc;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
+@EnableScheduling
 @SpringBootApplication
 public class IfcApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(IfcApplication.class, args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(IfcApplication.class, args);
+    }
 }
