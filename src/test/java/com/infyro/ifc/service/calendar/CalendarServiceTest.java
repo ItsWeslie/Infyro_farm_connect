@@ -2,6 +2,7 @@ package com.infyro.ifc.service.calendar;
 
 import com.infyro.ifc.dto.calendar.CalendarEventResponse;
 import org.junit.jupiter.api.Test;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -37,7 +38,7 @@ class CalendarServiceTest {
     @Test
     void rejectsInvalidDateRange() {
         CalendarService service = new CalendarService(List.of());
-        assertThrows(IllegalArgumentException.class, () -> service.getEvents(
+        assertThrows(ResponseStatusException.class, () -> service.getEvents(
                 "farmer@example.com", LocalDate.parse("2026-12-31"), LocalDate.parse("2026-12-01")));
     }
 
