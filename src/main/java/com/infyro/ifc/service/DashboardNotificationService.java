@@ -1,5 +1,6 @@
 package com.infyro.ifc.service;
 
+import com.infyro.ifc.dto.calendar.CalendarEventResponse;
 import com.infyro.ifc.dto.notification.DashboardNotificationResponse;
 import com.infyro.ifc.model.DashboardNotification;
 import com.infyro.ifc.model.User;
@@ -12,8 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.Instant;
-import java.time.LocalDate;
+import java.time.Clock;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.List;
@@ -24,6 +24,7 @@ public class DashboardNotificationService {
     private final DashboardNotificationRepository repository;
     private final UserEmailRepository userRepository;
     private final ZoneId notificationZone;
+    private final Clock notificationClock;
 
     @Transactional(readOnly = true)
     public List<DashboardNotificationResponse> list(String email, boolean unreadOnly, int page, int size) {
@@ -48,18 +49,20 @@ public class DashboardNotificationService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Notification not found"));
         if (!notification.isRead()) {
             notification.setRead(true);
-            notification.setReadAt(Instant.now());
+            notification.setReadAt(notificationClock.instant());
         }
         return toResponse(notification);
     }
 
     @Transactional
-    public void scheduleReminder(String ownerEmail, com.infyro.ifc.dto.calendar.CalendarEventResponse event) {
+    public void scheduleReminder(String ownerEmail, CalendarEventResponse event) {
         User owner = userRepository.findByEmailIgnoreCase(ownerEmail)
                 .orElseThrow(() -> new IllegalStateException("Event owner no longer exists"));
-        Instant scheduledAt = event.eventDate().minusDays(1)
-                .atTime(LocalTime.of(9, 0)).atZone(notificationZone).toInstant();
         var existing = repository.findByOwner_IdAndEventKey(owner.getId(), event.eventKey());
+        var previousEventDate = existing.map(DashboardNotification::getEventDate).orElse(null);
+        var scheduledAt = event.eventDate().minusDays(1)
+                .atTime(LocalTime.of(9, 0)).atZone(notificationZone).toInstant();
+
         DashboardNotification notification = existing.orElseGet(() -> DashboardNotification.builder()
                 .owner(owner).eventKey(event.eventKey()).eventType(event.eventType())
                 .title(event.title() + " is scheduled for tomorrow")
@@ -68,7 +71,7 @@ public class DashboardNotificationService {
         notification.setTitle(event.title() + " is scheduled for tomorrow");
         notification.setEventDate(event.eventDate());
         notification.setScheduledAt(scheduledAt);
-        if (existing.isPresent() && notification.isRead()) {
+        if (previousEventDate != null && !previousEventDate.equals(event.eventDate()) && notification.isRead()) {
             notification.setRead(false);
             notification.setReadAt(null);
         }
