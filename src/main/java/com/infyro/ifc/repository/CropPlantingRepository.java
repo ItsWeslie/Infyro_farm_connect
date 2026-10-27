@@ -33,10 +33,11 @@ public interface CropPlantingRepository extends JpaRepository<CropPlanting, Long
             join fetch f.farm farm
             join fetch farm.owner owner
             join fetch p.cropType crop
-            where p.expectedHarvestOn = :eventDate
-              and p.status in :statuses
+            where ((p.plantedOn = :eventDate and p.status = :plannedStatus)
+                or (p.expectedHarvestOn = :eventDate and p.status in :harvestStatuses))
             """)
-    List<CropPlanting> findHarvestReminders(
+    List<CropPlanting> findReminderCandidates(
             @Param("eventDate") LocalDate eventDate,
-            @Param("statuses") Collection<CropPlantingStatus> statuses);
+            @Param("plannedStatus") CropPlantingStatus plannedStatus,
+            @Param("harvestStatuses") Collection<CropPlantingStatus> harvestStatuses);
 }
