@@ -15,6 +15,7 @@ import java.util.List;
 })
 @Getter
 @Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

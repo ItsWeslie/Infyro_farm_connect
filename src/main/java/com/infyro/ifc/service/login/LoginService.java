@@ -5,6 +5,7 @@ import com.infyro.ifc.dto.auth.LoginResponse;
 import com.infyro.ifc.strategy.login.LoginStrategy;
 import com.infyro.ifc.strategy.login.LoginStrategyFactory;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 

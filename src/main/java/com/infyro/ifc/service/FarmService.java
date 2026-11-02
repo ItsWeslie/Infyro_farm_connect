@@ -44,6 +44,7 @@ public class FarmService {
                 .build();
 
         Farm createdFarm = farmRepo.save(newFarm);
+        log.info("FarmService-createNewFarm new farm created! \n created_farm={}",newFarm.toString());
         return ResponseEntity.status(HttpStatus.CREATED).body(farmMapper.mapToFarmResponse(createdFarm));
     }
 
@@ -51,6 +52,7 @@ public class FarmService {
     public ResponseEntity<FarmResponse> getFarmByID(Long id, String email) {
         Farm farm = farmRepo.findByIdAndOwner_Email(id, email)
                 .orElseThrow(() -> new FarmNotFoundException("Farm not found with ID: " + id));
+        log.info("FarmService-getFarmByID Executed for the ID={} \n Data={}",id,farm.toString());
         return ResponseEntity.ok(farmMapper.mapToFarmResponse(farm));
     }
 
@@ -58,6 +60,7 @@ public class FarmService {
     public ResponseEntity<List<FarmResponse>> getFarmsByOwner(String email) {
         List<FarmResponse> responses = farmRepo.findAllByOwner_Email(email)
                 .stream().map(farmMapper::mapToFarmResponse).toList();
+        log.info("FarmService-getFarmByOwner Executed for the owner email={} \n Data={}",email,responses);
         return ResponseEntity.ok(responses);
     }
 
@@ -75,6 +78,7 @@ public class FarmService {
         }
 
         farmRepo.deleteByIdAndOwner_Email(id, email);
+        log.info("FarmService-deleteFarm Farm Deleted with the ID={}",id);
         return ResponseEntity.ok(new APIResponse("Farm deleted successfully"));
     }
 
@@ -84,6 +88,7 @@ public class FarmService {
                 .orElseThrow(() -> new FarmNotFoundException("Farm not found with given id: " + id));
         oldFarm.setFarmName(request.farmName());
         Farm updatedFarm = farmRepo.save(oldFarm);
+        log.info("FarmService-updateFarm farm updated! \n updated_farm={}",updatedFarm.toString());
         return ResponseEntity.ok(farmMapper.mapToFarmResponse(updatedFarm));
     }
 }

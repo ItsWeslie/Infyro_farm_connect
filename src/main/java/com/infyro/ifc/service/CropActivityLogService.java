@@ -9,6 +9,7 @@ import com.infyro.ifc.model.CropPlanting;
 import com.infyro.ifc.repository.CropActivityLogRepository;
 import com.infyro.ifc.repository.CropPlantingRepo;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CropActivityLogService {
 
     private final CropActivityLogRepository activityRepository;
@@ -51,11 +53,13 @@ public class CropActivityLogService {
                 .findAllByCropPlanting_IdAndCropPlanting_Field_Farm_Owner_EmailOrderByDayNumberAscCreatedAtAsc(
                         plantingId, email)
                 .stream().map(mapper::toResponse).toList();
+        log.info("CropActivityLogService-getByPlanting Executed!");
         return ResponseEntity.ok(response);
     }
 
     @Transactional(readOnly = true)
     public ResponseEntity<CropActivityLogResponse> getById(Long id, String email) {
+        log.info("CropActivityLogService-getByID Executed for ID = {},Email = {} ", id, email);
         return ResponseEntity.ok(mapper.toResponse(getOwnedActivity(id, email)));
     }
 
