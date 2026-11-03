@@ -127,7 +127,7 @@ public class CropPlantingService {
         planting.setPlantedOn(request.plantedOn());
         planting.setExpectedHarvestOn(expectedHarvest);
         planting.setMaturityTimeInDays(maturity);
-        log.info("CropPlantingService-update \n Request={} \n Updated={}",request.toString(),planting.toString());
+        log.info("CropPlantingService-update Request={} Updated plantingId={}",request.toString(),planting.getId());
         return ResponseEntity.ok(cropPlantingMapper.toResponse(plantingRepository.save(planting)));
     }
 
@@ -140,7 +140,6 @@ public class CropPlantingService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid planting status transition");
         }
 
-        // Serialize valid lifecycle changes against field-area allocations and other planting status changes.
         getLockedField(planting.getField().getId(), email);
         planting.setStatus(newStatus);
         if (newStatus == CropPlantingStatus.COMPLETED) {
@@ -157,14 +156,14 @@ public class CropPlantingService {
     public ResponseEntity<APIResponse> delete(Long id, String email) {
         CropPlanting planting = getPlanting(id, email);
         if (planting.getStatus() != CropPlantingStatus.PLANNED) {
-            log.error("CropPlantingService-delete Failed! Only planned plantings can be deleted; cancel active plantings instead \n {} ",planting.toString());
+            log.error("CropPlantingService-delete Failed! Only planned plantings can be deleted; cancel active plantings instead. plantingId={}, status={}",id,planting.getStatus());
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "Only planned plantings can be deleted; cancel active plantings instead");
         }
         if (expenseRepository.existsByCropPlanting_Id(id)
                 || harvestRecordRepository.existsByCropPlanting_Id(id)
                 || activityLogRepository.existsByCropPlanting_Id(id)) {
-            log.error("CropPlantingService-delete Failed! Planting cannot be deleted while expense, harvest, or activity history exists \n {} ",planting.toString());
+            log.error("CropPlantingService-delete Failed! Planting has expense, harvest, or activity history. plantingId={}",id);
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "Planting cannot be deleted while expense, harvest, or activity history exists");
         }
@@ -172,7 +171,7 @@ public class CropPlantingService {
         Field field = getLockedField(planting.getField().getId(), email);
         field.getCrops().removeIf(crop -> crop.getId().equals(planting.getId()));
         plantingRepository.delete(planting);
-        log.info("CropPlantingService-delete Executed and Data Deleted! \n Deleted Data = {}",planting.toString());
+        log.info("CropPlantingService-delete Executed and Data Deleted! plantingId={}",id);
         return ResponseEntity.ok(new APIResponse("Planting deleted successfully"));
     }
 

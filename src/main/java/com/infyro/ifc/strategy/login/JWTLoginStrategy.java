@@ -2,67 +2,29 @@ package com.infyro.ifc.strategy.login;
 
 import com.infyro.ifc.api.LoginTypeConstants;
 import com.infyro.ifc.dto.auth.LoginRequest;
-import com.infyro.ifc.dto.auth.LoginResponse;
-import com.infyro.ifc.enums.UserType;
+import com.infyro.ifc.dto.auth.TokenResponse;
 import com.infyro.ifc.model.User;
-import com.infyro.ifc.security.JWTService;
 import com.infyro.ifc.security.UserPrincipal;
+import com.infyro.ifc.service.login.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-
 @Service(LoginTypeConstants.JWT)
 @RequiredArgsConstructor
 public class JWTLoginStrategy implements LoginStrategy {
-
-    private final JWTService jwtService;
     private final AuthenticationManager authManager;
-
-    private String getJwtCookie(String token) {
-        ResponseCookie jwtCookie = ResponseCookie.from("access_token", token)
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .sameSite("Strict")
-                .maxAge(24 * 60 * 60)
-                .build();
-        return jwtCookie.toString();
-    }
+    private final RefreshTokenService refreshTokens;
 
     @Override
-    public ResponseEntity<LoginResponse> login(LoginRequest loginRequest) {
-
-        Authentication auth = authManager
-                .authenticate(new UsernamePasswordAuthenticationToken(
-                        loginRequest.email(),
-                        loginRequest.password()
-                        ));
-
-        UserPrincipal principal = (UserPrincipal) auth.getPrincipal();
-        if(principal == null) {
-            throw new RuntimeException("Principal is null");
-        }
+    public ResponseEntity<TokenResponse> login(LoginRequest request) {
+        Authentication authentication = authManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.email(), request.password()));
+        UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
         User user = principal.getUser();
-
-        String token = jwtService.generateToken(user.getEmail());
-
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .header(HttpHeaders.SET_COOKIE, getJwtCookie(token))
-                .body(
-                     LoginResponse.builder()
-                             .username(user.getEmail())
-                             .role(UserType.USER)
-                             .message("Login successful")
-                             .isLoggedIn(true)
-                             .build()
-                );
+        return refreshTokens.issue(user);
     }
 }
