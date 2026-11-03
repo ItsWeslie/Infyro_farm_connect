@@ -80,7 +80,7 @@ class AuthFlowIntegrationTest {
         mvc.perform(post(REFRESH)
                         .header(HttpHeaders.ORIGIN, ORIGIN)
                         .header("X-XSRF-TOKEN", oldCsrf)
-                        .header(HttpHeaders.COOKIE, cookieHeader(oldRefresh, oldCsrf)))
+                        .cookie(new Cookie("refresh_token", oldRefresh), new Cookie("XSRF-TOKEN", oldCsrf)))
                 .andExpect(status().isUnauthorized());
 
         mvc.perform(get(VALIDATE).header(HttpHeaders.AUTHORIZATION, "Bearer " + newAccess))
