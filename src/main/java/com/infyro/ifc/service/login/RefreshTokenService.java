@@ -32,7 +32,7 @@ public class RefreshTokenService {
     public RefreshTokenService(RefreshTokenRepo tokens, UserRepo users, JWTService jwt, TokenCookieService cookies,
             @Value("${auth.refresh.idle-lifetime:PT168H}") Duration idleLifetime,
             @Value("${auth.refresh.absolute-lifetime:P30D}") Duration absoluteLifetime,
-            @Value("${jwt.expiration:PT10M}") Duration accessLifetime) {
+            @Value("${auth.access-token-lifetime:PT10M}") Duration accessLifetime) {
         this.tokens=tokens; this.users=users; this.jwt=jwt; this.cookies=cookies;
         this.idleLifetime=idleLifetime; this.absoluteLifetime=absoluteLifetime; this.accessLifetime=accessLifetime;
     }
