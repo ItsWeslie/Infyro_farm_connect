@@ -10,12 +10,18 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.security.core.AuthenticationException;
 
 import java.util.List;
 
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiErrorResponse> handleAuthenticationException(AuthenticationException e) {
+        return error(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "Invalid email or password");
+    }
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleUserNotFoundException(UserNotFoundException e) {
