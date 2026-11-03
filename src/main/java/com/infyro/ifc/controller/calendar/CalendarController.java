@@ -1,7 +1,7 @@
-package com.infyro.ifc.controller;
+package com.infyro.ifc.controller.calendar;
 
 import com.infyro.ifc.dto.calendar.CalendarEventResponse;
-import com.infyro.ifc.service.CalendarService;
+import com.infyro.ifc.service.calendar.CalendarService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;

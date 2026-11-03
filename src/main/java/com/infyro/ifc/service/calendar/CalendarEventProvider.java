@@ -1,4 +1,4 @@
-package com.infyro.ifc.calendar;
+package com.infyro.ifc.service.calendar;
 
 import com.infyro.ifc.dto.calendar.CalendarEventResponse;
 import com.infyro.ifc.dto.calendar.ReminderCandidate;

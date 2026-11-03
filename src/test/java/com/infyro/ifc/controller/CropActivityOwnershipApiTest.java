@@ -1,8 +1,9 @@
 package com.infyro.ifc.controller;
 
+import com.infyro.ifc.controller.crop.CropActivityLogController;
 import com.infyro.ifc.dto.activity.CropActivityLogResponse;
 import com.infyro.ifc.exception.GlobalExceptionHandler;
-import com.infyro.ifc.service.CropActivityLogService;
+import com.infyro.ifc.service.crop.CropActivityLogService;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

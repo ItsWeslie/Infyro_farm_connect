@@ -1,4 +1,4 @@
-package com.infyro.ifc.dto;
+package com.infyro.ifc.dto.api;
 
 import java.util.List;
 

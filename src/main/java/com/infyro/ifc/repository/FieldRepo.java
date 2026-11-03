@@ -13,11 +13,9 @@ import java.util.Optional;
 
 @Repository
 public interface FieldRepo extends JpaRepository<Field,Long> {
-    List<Field> findAllByFarm_IdAndFarm_Owner_Email(
-            Long farmId, String email);
+    List<Field> findAllByFarm_IdAndFarm_Owner_Email(Long farmId, String email);
 
-    Optional<Field> findByIdAndFarm_Owner_Email(
-            Long fieldId, String email);
+    Optional<Field> findByIdAndFarm_Owner_Email(Long fieldId, String email);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""

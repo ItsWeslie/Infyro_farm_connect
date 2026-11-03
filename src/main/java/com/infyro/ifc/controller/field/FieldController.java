@@ -1,7 +1,7 @@
-package com.infyro.ifc.controller;
+package com.infyro.ifc.controller.field;
 
 import com.infyro.ifc.api.APIConstants;
-import com.infyro.ifc.dto.APIResponse;
+import com.infyro.ifc.dto.api.ApiResponse;
 import com.infyro.ifc.dto.field.FieldRequest;
 import com.infyro.ifc.dto.field.FieldResponse;
 import com.infyro.ifc.dto.field.FieldUpdateRequest;
@@ -35,7 +35,6 @@ public class FieldController {
     @GetMapping(APIConstants.Field.GET_FIELDS_BY_FARM)
     public ResponseEntity<List<FieldResponse>> getFieldsByFarm(@PathVariable Long farmId,
                                                                Principal principal) {
-
         return fieldService.getFieldsByFarm(
                 farmId, principal.getName());
     }
@@ -57,7 +56,7 @@ public class FieldController {
     }
 
     @DeleteMapping(APIConstants.Field.DELETE)
-    public ResponseEntity<APIResponse> deleteField(@PathVariable Long fieldId,
+    public ResponseEntity<ApiResponse> deleteField(@PathVariable Long fieldId,
                                                    Principal principal) {
         return fieldService.deleteField(
                 fieldId, principal.getName());

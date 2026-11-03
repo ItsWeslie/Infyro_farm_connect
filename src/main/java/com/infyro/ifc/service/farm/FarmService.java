@@ -1,6 +1,6 @@
-package com.infyro.ifc.service;
+package com.infyro.ifc.service.farm;
 
-import com.infyro.ifc.dto.APIResponse;
+import com.infyro.ifc.dto.api.ApiResponse;
 import com.infyro.ifc.dto.farm.FarmRequest;
 import com.infyro.ifc.dto.farm.FarmResponse;
 import com.infyro.ifc.exception.FarmNotFoundException;
@@ -44,7 +44,7 @@ public class FarmService {
                 .build();
 
         Farm createdFarm = farmRepo.save(newFarm);
-        log.info("FarmService-createNewFarm new farm created! \n created_farm={}",newFarm.toString());
+        log.info("FarmService-createNewFarm new farm created! \n created_farm={}", newFarm);
         return ResponseEntity.status(HttpStatus.CREATED).body(farmMapper.mapToFarmResponse(createdFarm));
     }
 
@@ -65,7 +65,7 @@ public class FarmService {
     }
 
     @Transactional
-    public ResponseEntity<APIResponse> deleteFarm(Long id, String email) {
+    public ResponseEntity<ApiResponse> deleteFarm(Long id, String email) {
         boolean exists = farmRepo.existsByIdAndOwner_Email(id, email);
         if (!exists) {
             throw new FarmNotFoundException("Farm not found with given id: " + id);
@@ -79,7 +79,7 @@ public class FarmService {
 
         farmRepo.deleteByIdAndOwner_Email(id, email);
         log.info("FarmService-deleteFarm Farm Deleted with the ID={}",id);
-        return ResponseEntity.ok(new APIResponse("Farm deleted successfully"));
+        return ResponseEntity.ok(new ApiResponse("Farm deleted successfully"));
     }
 
     @Transactional

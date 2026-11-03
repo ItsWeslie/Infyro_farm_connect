@@ -6,6 +6,7 @@ import com.infyro.ifc.enums.HarvestUnit;
 import com.infyro.ifc.exception.FarmNotFoundException;
 import com.infyro.ifc.model.*;
 import com.infyro.ifc.repository.*;
+import com.infyro.ifc.service.farm.FarmSummaryService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,7 +26,8 @@ class FarmSummaryServiceTest {
     @Mock CropPlantingRepo cropPlantingRepo;
     @Mock ExpenseRepository expenseRepository;
     @Mock HarvestRecordRepository harvestRecordRepository;
-    @InjectMocks FarmSummaryService service;
+    @InjectMocks
+    FarmSummaryService service;
 
     @Test
     void farmSummaryExcludesVoidedRecordsAndGroupsHarvestsByUnit() {

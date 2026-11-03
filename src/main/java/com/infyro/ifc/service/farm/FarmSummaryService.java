@@ -1,4 +1,4 @@
-package com.infyro.ifc.service;
+package com.infyro.ifc.service.farm;
 
 import com.infyro.ifc.dto.farm.*;
 import com.infyro.ifc.enums.CropPlantingStatus;

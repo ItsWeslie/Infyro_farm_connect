@@ -1,4 +1,4 @@
-package com.infyro.ifc.dto;
+package com.infyro.ifc.dto.api;
 
 import lombok.*;
 
@@ -7,6 +7,6 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class APIResponse {
+public class ApiResponse {
     private String message;
 }

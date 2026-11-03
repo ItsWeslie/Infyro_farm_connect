@@ -1,5 +1,6 @@
 package com.infyro.ifc.controller;
 
+import com.infyro.ifc.controller.harvest.HarvestRecordController;
 import com.infyro.ifc.dto.harvest.HarvestRecordResponse;
 import com.infyro.ifc.exception.GlobalExceptionHandler;
 import com.infyro.ifc.service.HarvestRecordService;

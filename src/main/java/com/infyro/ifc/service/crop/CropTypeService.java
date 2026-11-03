@@ -1,6 +1,6 @@
-package com.infyro.ifc.service;
+package com.infyro.ifc.service.crop;
 
-import com.infyro.ifc.dto.APIResponse;
+import com.infyro.ifc.dto.api.ApiResponse;
 import com.infyro.ifc.dto.crop.CropTypeRequest;
 import com.infyro.ifc.dto.crop.CropTypeResponse;
 import com.infyro.ifc.mapper.CropTypeMapper;
@@ -91,7 +91,7 @@ public class CropTypeService {
     }
 
     @Transactional
-    public ResponseEntity<APIResponse> delete(Long farmId, Long id, String email) {
+    public ResponseEntity<ApiResponse> delete(Long farmId, Long id, String email) {
 
         CropType cropType = getCropType(farmId, id, email);
 
@@ -105,7 +105,7 @@ public class CropTypeService {
         cropTypeRepository.delete(cropType);
 
         log.info("CropTypeService-delete Executed CropType removed! \n removed_Data={}",cropType);
-        return ResponseEntity.ok(new APIResponse("Crop type deleted successfully"));
+        return ResponseEntity.ok(new ApiResponse("Crop type deleted successfully"));
     }
 
     private Farm getFarm(Long farmId, String email) {
@@ -129,7 +129,8 @@ public class CropTypeService {
                     .existsByFarm_IdAndNameIgnoreCaseAndIdNot(farmId, name.trim(), excludedId);
 
         if (exists) {
-            log.error("CropTypeService-ensureUniqueName Failed Crop type name already exists in this farm \n FarmName={} ",name);
+            log.error("CropTypeService-ensureUniqueName " +
+                    "Failed Crop type name already exists in this farm \n FarmName={} ",name);
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
                     "Crop type name already exists in this farm");

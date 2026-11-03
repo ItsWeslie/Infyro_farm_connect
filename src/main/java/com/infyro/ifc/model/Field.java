@@ -21,7 +21,6 @@ import java.util.List;
 @Builder
 @Getter
 @Setter
-@Data
 public class Field {
 
     @Id

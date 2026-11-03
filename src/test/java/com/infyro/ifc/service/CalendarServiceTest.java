@@ -1,7 +1,8 @@
 package com.infyro.ifc.service;
 
-import com.infyro.ifc.calendar.CalendarEventProvider;
+import com.infyro.ifc.service.calendar.CalendarEventProvider;
 import com.infyro.ifc.dto.calendar.CalendarEventResponse;
+import com.infyro.ifc.service.calendar.CalendarService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.server.ResponseStatusException;

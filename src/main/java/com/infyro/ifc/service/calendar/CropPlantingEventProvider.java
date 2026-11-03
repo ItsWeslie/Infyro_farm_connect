@@ -1,10 +1,10 @@
-package com.infyro.ifc.calendar;
+package com.infyro.ifc.service.calendar;
 
 import com.infyro.ifc.dto.calendar.CalendarEventResponse;
 import com.infyro.ifc.dto.calendar.ReminderCandidate;
 import com.infyro.ifc.enums.CropPlantingStatus;
 import com.infyro.ifc.model.CropPlanting;
-import com.infyro.ifc.repository.CropPlantingRepository;
+import com.infyro.ifc.repository.CropPlantingRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +18,7 @@ public class CropPlantingEventProvider implements CalendarEventProvider {
     private static final List<CropPlantingStatus> HARVEST_REMINDER_STATUSES =
             List.of(CropPlantingStatus.PLANNED, CropPlantingStatus.ACTIVE, CropPlantingStatus.HARVESTING);
 
-    private final CropPlantingRepository cropPlantingRepository;
+    private final CropPlantingRepo cropPlantingRepository;
 
     @Override
     public List<CalendarEventResponse> findEvents(String ownerEmail, LocalDate from, LocalDate to) {

@@ -10,7 +10,8 @@ import java.util.Optional;
 @Repository
 public interface CropActivityLogRepository extends JpaRepository<CropActivityLog, Long> {
 
-    List<CropActivityLog> findAllByCropPlanting_IdAndCropPlanting_Field_Farm_Owner_EmailOrderByDayNumberAscCreatedAtAsc(
+    List<CropActivityLog>
+    findAllByCropPlanting_IdAndCropPlanting_Field_Farm_Owner_EmailOrderByDayNumberAscCreatedAtAsc(
             Long plantingId, String email);
 
     Optional<CropActivityLog> findByIdAndCropPlanting_Field_Farm_Owner_Email(

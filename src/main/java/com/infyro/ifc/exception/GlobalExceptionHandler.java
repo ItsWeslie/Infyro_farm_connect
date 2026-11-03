@@ -1,7 +1,7 @@
 package com.infyro.ifc.exception;
 
-import com.infyro.ifc.dto.ApiErrorResponse;
-import com.infyro.ifc.dto.ApiFieldError;
+import com.infyro.ifc.dto.api.ApiErrorResponse;
+import com.infyro.ifc.dto.api.ApiFieldError;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -1,6 +1,6 @@
 package com.infyro.ifc.service;
 
-import com.infyro.ifc.dto.APIResponse;
+import com.infyro.ifc.dto.api.ApiResponse;
 import com.infyro.ifc.dto.field.FieldRequest;
 import com.infyro.ifc.dto.field.FieldResponse;
 import com.infyro.ifc.dto.field.FieldUpdateRequest;
@@ -84,7 +84,7 @@ public class FieldService {
     }
 
     @Transactional
-    public ResponseEntity<APIResponse> deleteField(Long fieldId, String email) {
+    public ResponseEntity<ApiResponse> deleteField(Long fieldId, String email) {
         Field field = getOwnedField(fieldId, email);
         if (field.getCrops() != null && !field.getCrops().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
@@ -92,7 +92,7 @@ public class FieldService {
         }
         fieldRepo.delete(field);
         log.info("FieldService-deleteField Field deleted with the ID={}",fieldId);
-        return ResponseEntity.ok(new APIResponse("Field deleted successfully"));
+        return ResponseEntity.ok(new ApiResponse("Field deleted successfully"));
     }
 
     private Field getOwnedField(Long fieldId, String email) {

@@ -1,8 +1,8 @@
 package com.infyro.ifc.controller;
 
-import com.infyro.ifc.dto.crop.CropPlantingStatusRequest;
+import com.infyro.ifc.controller.crop.CropPlantingController;
 import com.infyro.ifc.exception.GlobalExceptionHandler;
-import com.infyro.ifc.service.CropPlantingService;
+import com.infyro.ifc.service.crop.CropPlantingService;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;

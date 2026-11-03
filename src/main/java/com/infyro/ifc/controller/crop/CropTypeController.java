@@ -1,10 +1,10 @@
-package com.infyro.ifc.controller;
+package com.infyro.ifc.controller.crop;
 
 import com.infyro.ifc.api.APIConstants;
-import com.infyro.ifc.dto.APIResponse;
+import com.infyro.ifc.dto.api.ApiResponse;
 import com.infyro.ifc.dto.crop.CropTypeRequest;
 import com.infyro.ifc.dto.crop.CropTypeResponse;
-import com.infyro.ifc.service.CropTypeService;
+import com.infyro.ifc.service.crop.CropTypeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -50,7 +50,7 @@ public class CropTypeController {
     }
 
     @DeleteMapping(APIConstants.CropType.DELETE)
-    public ResponseEntity<APIResponse> delete(@PathVariable Long farmId,
+    public ResponseEntity<ApiResponse> delete(@PathVariable Long farmId,
                                               @PathVariable Long id, Principal principal) {
 
         return cropTypeService.delete(farmId, id, principal.getName());

@@ -1,5 +1,6 @@
 package com.infyro.ifc.controller;
 
+import com.infyro.ifc.controller.expense.ExpenseController;
 import com.infyro.ifc.dto.expense.ExpenseResponse;
 import com.infyro.ifc.exception.GlobalExceptionHandler;
 import com.infyro.ifc.service.ExpenseService;

@@ -1,6 +1,5 @@
-package com.infyro.ifc.service;
+package com.infyro.ifc.service.calendar;
 
-import com.infyro.ifc.calendar.CalendarEventProvider;
 import com.infyro.ifc.dto.calendar.CalendarEventResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

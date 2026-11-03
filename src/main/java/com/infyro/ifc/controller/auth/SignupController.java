@@ -1,7 +1,7 @@
 package com.infyro.ifc.controller.auth;
 
 import com.infyro.ifc.api.APIConstants;
-import com.infyro.ifc.dto.APIResponse;
+import com.infyro.ifc.dto.api.ApiResponse;
 import com.infyro.ifc.dto.auth.SignupRequest;
 import com.infyro.ifc.service.signup.SignupService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.*;
 public class SignupController {
     private final SignupService signupService;
     @PostMapping(APIConstants.Auth.SIGNUP)
-    public ResponseEntity<APIResponse> signup(@Valid @RequestBody SignupRequest request,
-                                               HttpServletRequest servletRequest) {
+    public ResponseEntity<ApiResponse> signup(@Valid @RequestBody SignupRequest request,
+                                              HttpServletRequest servletRequest) {
         return signupService.signup(request, servletRequest);
     }
 }

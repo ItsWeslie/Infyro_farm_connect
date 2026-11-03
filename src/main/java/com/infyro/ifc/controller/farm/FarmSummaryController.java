@@ -1,7 +1,7 @@
-package com.infyro.ifc.controller;
+package com.infyro.ifc.controller.farm;
 
 import com.infyro.ifc.dto.farm.*;
-import com.infyro.ifc.service.FarmSummaryService;
+import com.infyro.ifc.service.farm.FarmSummaryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;

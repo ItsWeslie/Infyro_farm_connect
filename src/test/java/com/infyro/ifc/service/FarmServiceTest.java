@@ -6,6 +6,7 @@ import com.infyro.ifc.repository.ExpenseRepository;
 import com.infyro.ifc.repository.FarmRepo;
 import com.infyro.ifc.repository.HarvestRecordRepository;
 import com.infyro.ifc.repository.UserRepo;
+import com.infyro.ifc.service.farm.FarmService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,7 +25,8 @@ class FarmServiceTest {
     @Mock FarmMapper farmMapper;
     @Mock ExpenseRepository expenseRepository;
     @Mock HarvestRecordRepository harvestRecordRepository;
-    @InjectMocks FarmService service;
+    @InjectMocks
+    FarmService service;
 
     @Test
     void hidesFarmOwnedByAnotherUserAsNotFound() {

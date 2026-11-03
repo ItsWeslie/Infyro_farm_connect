@@ -1,4 +1,4 @@
-package com.infyro.ifc.controller;
+package com.infyro.ifc.controller.harvest;
 
 import com.infyro.ifc.dto.harvest.*;
 import com.infyro.ifc.service.HarvestRecordService;

@@ -1,4 +1,4 @@
-package com.infyro.ifc.service;
+package com.infyro.ifc.service.crop;
 
 import com.infyro.ifc.dto.activity.CropActivityLogRequest;
 import com.infyro.ifc.dto.activity.CropActivityLogResponse;

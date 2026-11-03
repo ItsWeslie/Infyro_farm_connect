@@ -1,16 +1,15 @@
 package com.infyro.ifc.controller;
 
+import com.infyro.ifc.controller.expense.ExpenseController;
+import com.infyro.ifc.controller.farm.FarmSummaryController;
+import com.infyro.ifc.controller.harvest.HarvestRecordController;
 import com.infyro.ifc.dto.expense.ExpenseRequest;
 import com.infyro.ifc.dto.expense.ExpenseResponse;
-import com.infyro.ifc.dto.farm.ExpenseSummaryResponse;
-import com.infyro.ifc.dto.farm.HarvestSummaryResponse;
-import com.infyro.ifc.dto.farm.PlantingSummaryResponse;
-import com.infyro.ifc.dto.farm.FarmSummaryResponse;
 import com.infyro.ifc.dto.harvest.HarvestRecordRequest;
 import com.infyro.ifc.dto.harvest.HarvestRecordResponse;
 import com.infyro.ifc.exception.GlobalExceptionHandler;
 import com.infyro.ifc.service.ExpenseService;
-import com.infyro.ifc.service.FarmSummaryService;
+import com.infyro.ifc.service.farm.FarmSummaryService;
 import com.infyro.ifc.service.HarvestRecordService;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -19,7 +18,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.security.Principal;
 import java.time.LocalDate;
-import java.math.BigDecimal;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;

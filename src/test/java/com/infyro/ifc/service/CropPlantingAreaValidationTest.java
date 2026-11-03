@@ -10,6 +10,7 @@ import com.infyro.ifc.repository.CropPlantingRepo;
 import com.infyro.ifc.repository.CropTypeRepository;
 import com.infyro.ifc.repository.FieldRepo;
 import com.infyro.ifc.enums.CropPlantingStatus;
+import com.infyro.ifc.service.crop.CropPlantingService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,7 +34,8 @@ class CropPlantingAreaValidationTest {
     @Mock CropTypeRepository cropTypeRepository;
     @Mock FieldRepo fieldRepo;
     @Mock CropPlantingMapper mapper;
-    @InjectMocks CropPlantingService service;
+    @InjectMocks
+    CropPlantingService service;
 
     @Test void rejectsPlantingThatExceedsDerivedAvailableArea() {
         Farm farm = Farm.builder().id(7L).build();

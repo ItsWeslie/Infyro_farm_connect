@@ -1,5 +1,6 @@
 package com.infyro.ifc.controller;
 
+import com.infyro.ifc.controller.farm.FarmSummaryController;
 import com.infyro.ifc.dto.farm.ExpenseSummaryResponse;
 import com.infyro.ifc.dto.farm.FarmSummaryResponse;
 import com.infyro.ifc.dto.farm.HarvestSummaryResponse;
@@ -7,7 +8,7 @@ import com.infyro.ifc.dto.farm.PlantingSummaryResponse;
 import com.infyro.ifc.enums.CropPlantingStatus;
 import com.infyro.ifc.enums.ExpenseCategory;
 import com.infyro.ifc.enums.HarvestUnit;
-import com.infyro.ifc.service.FarmSummaryService;
+import com.infyro.ifc.service.farm.FarmSummaryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.MockMvc;

@@ -1,6 +1,6 @@
 package com.infyro.ifc.exception;
 
-import com.infyro.ifc.dto.ApiErrorResponse;
+import com.infyro.ifc.dto.api.ApiErrorResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.MethodParameter;
 import org.springframework.validation.BeanPropertyBindingResult;

@@ -1,4 +1,4 @@
-package com.infyro.ifc.controller;
+package com.infyro.ifc.controller.dashboard;
 
 import com.infyro.ifc.dto.notification.DashboardNotificationResponse;
 import com.infyro.ifc.service.DashboardNotificationService;

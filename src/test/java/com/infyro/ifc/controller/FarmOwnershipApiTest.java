@@ -1,9 +1,9 @@
 package com.infyro.ifc.controller;
 
-import com.infyro.ifc.dto.farm.FarmRequest;
+import com.infyro.ifc.controller.farm.FarmController;
 import com.infyro.ifc.exception.FarmNotFoundException;
 import com.infyro.ifc.exception.GlobalExceptionHandler;
-import com.infyro.ifc.service.FarmService;
+import com.infyro.ifc.service.farm.FarmService;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;

@@ -1,11 +1,11 @@
-package com.infyro.ifc.controller;
+package com.infyro.ifc.controller.farm;
 
 
 import com.infyro.ifc.api.APIConstants;
-import com.infyro.ifc.dto.APIResponse;
+import com.infyro.ifc.dto.api.ApiResponse;
 import com.infyro.ifc.dto.farm.FarmRequest;
 import com.infyro.ifc.dto.farm.FarmResponse;
-import com.infyro.ifc.service.FarmService;
+import com.infyro.ifc.service.farm.FarmService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,11 +37,10 @@ public class FarmController {
     @GetMapping(APIConstants.Farm.OWNED_FARMS)
     public ResponseEntity<List<FarmResponse>> getFarmByOwner(Principal principal) {
         return farmService.getFarmsByOwner(principal.getName());
-
     }
 
     @DeleteMapping(APIConstants.Farm.DELETE)
-    public ResponseEntity<APIResponse> deleteFarm(@PathVariable Long id,Principal principal) {
+    public ResponseEntity<ApiResponse> deleteFarm(@PathVariable Long id, Principal principal) {
        return farmService.deleteFarm(id,principal.getName());
     }
 

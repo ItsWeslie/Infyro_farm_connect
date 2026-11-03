@@ -1,10 +1,10 @@
-package com.infyro.ifc.controller;
+package com.infyro.ifc.controller.crop;
 
 import com.infyro.ifc.api.APIConstants;
 import com.infyro.ifc.dto.activity.CropActivityLogRequest;
 import com.infyro.ifc.dto.activity.CropActivityLogResponse;
 import com.infyro.ifc.enums.ActivityStatus;
-import com.infyro.ifc.service.CropActivityLogService;
+import com.infyro.ifc.service.crop.CropActivityLogService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

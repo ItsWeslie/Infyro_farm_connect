@@ -10,6 +10,7 @@ import com.infyro.ifc.repository.ExpenseRepository;
 import com.infyro.ifc.repository.HarvestRecordRepository;
 import com.infyro.ifc.repository.CropTypeRepository;
 import com.infyro.ifc.repository.FieldRepo;
+import com.infyro.ifc.service.crop.CropPlantingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

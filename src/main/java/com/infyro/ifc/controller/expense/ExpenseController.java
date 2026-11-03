@@ -1,4 +1,4 @@
-package com.infyro.ifc.controller;
+package com.infyro.ifc.controller.expense;
 
 import com.infyro.ifc.dto.expense.*;
 import com.infyro.ifc.service.ExpenseService;
