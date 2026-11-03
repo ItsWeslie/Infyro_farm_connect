@@ -95,6 +95,32 @@ class RefreshTokenServiceTest {
         verify(tokens).revokeFamily(eq("family-1"), any(Instant.class));
     }
 
+    @Test
+    void absoluteExpiryRevokesTheTokenFamily() throws Exception {
+        Instant now = Instant.now();
+        RefreshToken expired = RefreshToken.builder().id(11L).user(user).familyId("family-absolute")
+                .tokenHash(hash("absolute-expired-secret")).createdAt(now.minus(Duration.ofDays(31)))
+                .expiresAt(now.plus(Duration.ofDays(1))).absoluteExpiresAt(now.minusSeconds(1)).build();
+        when(tokens.findForUpdateByTokenHash(hash("absolute-expired-secret"))).thenReturn(Optional.of(expired));
+
+        assertEquals(401, assertThrows(ResponseStatusException.class,
+                () -> service.rotate(requestWithRefresh("absolute-expired-secret"))).getStatusCode().value());
+        verify(tokens).revokeFamily(eq("family-absolute"), any(Instant.class));
+    }
+
+    @Test
+    void logoutRevokesCurrentTokenFamilyAndClearsCookies() {
+        RefreshToken active = RefreshToken.builder().id(11L).user(user).familyId("family-logout")
+                .tokenHash("stored-hash").build();
+        when(tokens.findForUpdateByTokenHash(anyString())).thenReturn(Optional.of(active));
+
+        var response = service.logout(requestWithRefresh("logout-secret"));
+
+        assertEquals(204, response.getStatusCode().value());
+        verify(tokens).revokeFamily(eq("family-logout"), any(Instant.class));
+        assertEquals(2, response.getHeaders().get(HttpHeaders.SET_COOKIE).size());
+    }
+
     private MockHttpServletRequest requestWithRefresh(String raw) {
         MockHttpServletRequest request = new MockHttpServletRequest("POST", "/ifc/v1/auth/refresh");
         request.setCookies(new Cookie(TokenCookieService.REFRESH_COOKIE, raw));
