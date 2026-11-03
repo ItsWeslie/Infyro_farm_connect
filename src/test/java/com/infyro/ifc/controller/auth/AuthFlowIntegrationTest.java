@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.List;
+import jakarta.servlet.http.Cookie;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -63,7 +64,7 @@ class AuthFlowIntegrationTest {
         MvcResult rotated = mvc.perform(post(REFRESH)
                         .header(HttpHeaders.ORIGIN, ORIGIN)
                         .header("X-XSRF-TOKEN", oldCsrf)
-                        .header(HttpHeaders.COOKIE, cookieHeader(oldRefresh, oldCsrf)))
+                        .cookie(new Cookie("refresh_token", oldRefresh), new Cookie("XSRF-TOKEN", oldCsrf)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accessToken").isNotEmpty())
                 .andReturn();
@@ -98,7 +99,7 @@ class AuthFlowIntegrationTest {
         mvc.perform(post(LOGOUT)
                         .header(HttpHeaders.ORIGIN, ORIGIN)
                         .header("X-XSRF-TOKEN", csrf)
-                        .header(HttpHeaders.COOKIE, cookieHeader(refresh, csrf)))
+                        .cookie(new Cookie("refresh_token", refresh), new Cookie("XSRF-TOKEN", csrf)))
                 .andExpect(status().isNoContent());
 
         mvc.perform(get(VALIDATE).header(HttpHeaders.AUTHORIZATION, "Bearer " + access))
@@ -130,7 +131,4 @@ class AuthFlowIntegrationTest {
                 .orElseThrow(() -> new AssertionError("Missing " + name + " cookie"));
     }
 
-    private String cookieHeader(String refresh, String csrf) {
-        return "refresh_token=" + refresh + "; XSRF-TOKEN=" + csrf;
-    }
 }
