@@ -15,7 +15,7 @@ import java.time.LocalDate;
         @Index(name = "idx_expense_farm_date", columnList = "farm_id, expenseDate"),
         @Index(name = "idx_expense_planting_id", columnList = "crop_planting_id")
 })
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder @Data
 public class Expense {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false)

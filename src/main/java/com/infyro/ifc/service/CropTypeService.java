@@ -10,6 +10,7 @@ import com.infyro.ifc.repository.CropPlantingRepo;
 import com.infyro.ifc.repository.CropTypeRepository;
 import com.infyro.ifc.repository.FarmRepo;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CropTypeService {
 
     private final CropTypeRepository cropTypeRepository;
@@ -42,6 +44,7 @@ public class CropTypeService {
                 .farm(farm)
                 .build();
 
+        log.info("CropTypeService-create crop created \n Data={}",cropType.toString());
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(cropTypeMapper.toResponse(cropTypeRepository.save(cropType)));
@@ -58,12 +61,13 @@ public class CropTypeService {
                         .map(cropTypeMapper::toResponse)
                         .toList();
 
+        log.info("CropTypeService-getAll Executed and data retrieved \n Data={}",result);
         return ResponseEntity.ok(result);
     }
 
     @Transactional(readOnly = true)
     public ResponseEntity<CropTypeResponse> getById(Long farmId, Long id, String email) {
-
+        log.info("CropTypeService-getById Data retrieved for farmID={} ",farmId);
         return ResponseEntity.ok(
                 cropTypeMapper.toResponse(getCropType(farmId, id, email)));
     }
@@ -81,6 +85,7 @@ public class CropTypeService {
         cropType.setDescription(request.description());
         cropType.setDefaultMaturityTimeInDays(request.defaultMaturityTimeInDays());
 
+        log.info("CropTypeService-update Data updated \n Updated-data = {}", cropType);
         return ResponseEntity.ok(cropTypeMapper
                 .toResponse(cropTypeRepository.save(cropType)));
     }
@@ -91,6 +96,7 @@ public class CropTypeService {
         CropType cropType = getCropType(farmId, id, email);
 
         if (cropPlantingRepository.existsByCropType_Id(id)) {
+            log.error("CropTypeService-delete Failed Crop type is used by existing plantings \n CropID={}",id);
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
                     "Crop type is used by existing plantings");
@@ -98,6 +104,7 @@ public class CropTypeService {
 
         cropTypeRepository.delete(cropType);
 
+        log.info("CropTypeService-delete Executed CropType removed! \n removed_Data={}",cropType);
         return ResponseEntity.ok(new APIResponse("Crop type deleted successfully"));
     }
 
@@ -122,6 +129,7 @@ public class CropTypeService {
                     .existsByFarm_IdAndNameIgnoreCaseAndIdNot(farmId, name.trim(), excludedId);
 
         if (exists) {
+            log.error("CropTypeService-ensureUniqueName Failed Crop type name already exists in this farm \n FarmName={} ",name);
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
                     "Crop type name already exists in this farm");

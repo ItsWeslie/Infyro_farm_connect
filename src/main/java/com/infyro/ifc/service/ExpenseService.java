@@ -4,6 +4,7 @@ import com.infyro.ifc.dto.expense.*;
 import com.infyro.ifc.model.*;
 import com.infyro.ifc.repository.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +15,7 @@ import java.time.Instant;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ExpenseService {
     private final ExpenseRepository expenses;
     private final FarmRepo farms;
@@ -27,24 +29,31 @@ public class ExpenseService {
         if (request.cropPlantingId() != null) {
             planting = plantings.findByIdAndField_Farm_Owner_Email(request.cropPlantingId(), email)
                     .orElseThrow(() -> notFound("Crop planting not found"));
-            if (!planting.getField().getFarm().getId().equals(farm.getId()))
+            if (!planting.getField().getFarm().getId().equals(farm.getId())) {
+                log.error("ExpenseService-create Failed!,Planting does not belong to the specified farm \n Request_data={}",request);
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Planting does not belong to the specified farm");
+            }
         }
         Expense expense = Expense.builder().farm(farm).cropPlanting(planting)
                 .amount(request.amount()).expenseDate(request.expenseDate())
                 .category(request.category()).description(request.description().trim()).build();
+        log.info("ExpenseService-create Expense noted! \n Expense={} ",expense.toString());
         return response(expenses.save(expense));
     }
 
     @Transactional(readOnly = true)
     public List<ExpenseResponse> listByFarm(Long farmId, String email) {
-        if (farms.findByIdAndOwner_Email(farmId, email).isEmpty()) throw notFound("Farm not found");
+        if (farms.findByIdAndOwner_Email(farmId, email).isEmpty()) {
+            log.error("ExpenseService-listByFarm Failed!,Farm not found with the ID={}",farmId);
+            throw notFound("Farm not found");
+        }
         return expenses.findAllByFarm_IdAndFarm_Owner_EmailOrderByExpenseDateDescCreatedAtDesc(farmId, email)
                 .stream().map(this::response).toList();
     }
 
     @Transactional(readOnly = true)
     public ExpenseResponse getById(Long id, String email) {
+        log.info("ExpenseService-getById Executed!,ID={}",id);
         return response(expenses.findByIdAndFarm_Owner_Email(id, email)
                 .orElseThrow(() -> notFound("Expense not found")));
     }
@@ -54,12 +63,14 @@ public class ExpenseService {
         Expense expense = expenses.findByIdAndFarm_Owner_Email(id, email)
                 .orElseThrow(() -> notFound("Expense not found"));
         if (expense.isVoided()) {
+            log.error("ExpenseService-delete Failed!,Expense is already cancelled \n Expense={}",expense);
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Expense is already cancelled");
         }
         expense.setVoided(true);
         expense.setVoidedAt(Instant.now());
         expense.setVoidReason("Cancelled by owner; create a replacement expense to correct this entry");
         expenses.save(expense);
+        log.info("ExpenseService-delete Expense deleted!,Expense={}",expense);
     }
 
     private ExpenseResponse response(Expense e) {

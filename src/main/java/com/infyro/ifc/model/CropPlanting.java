@@ -21,6 +21,7 @@ import java.time.LocalDate;
 )
 @Getter
 @Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

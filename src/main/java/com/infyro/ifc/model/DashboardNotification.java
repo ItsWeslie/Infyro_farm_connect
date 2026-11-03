@@ -13,6 +13,7 @@ import java.time.LocalDate;
         name = "uk_notification_owner_event", columnNames = {"owner_id", "event_key"}))
 @Getter
 @Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

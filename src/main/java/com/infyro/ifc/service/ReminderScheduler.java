@@ -3,6 +3,7 @@ package com.infyro.ifc.service;
 import com.infyro.ifc.calendar.CalendarEventProvider;
 import com.infyro.ifc.dto.calendar.ReminderCandidate;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class ReminderScheduler {
     private static final LocalTime REMINDER_TIME = LocalTime.of(9, 0);
     private static final ZoneId APPLICATION_ZONE = ZoneId.of("Asia/Kolkata");
@@ -27,6 +29,7 @@ public class ReminderScheduler {
     public void createDueReminders() {
         var now = java.time.ZonedDateTime.now(clock);
         if (now.toLocalTime().isBefore(REMINDER_TIME)) {
+            log.warn("ReminderScheduler-createDueReminders Reminder-time not came!");
             return;
         }
         LocalDate eventDate = now.toLocalDate().plusDays(1);

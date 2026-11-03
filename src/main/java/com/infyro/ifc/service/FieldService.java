@@ -12,6 +12,7 @@ import com.infyro.ifc.model.Field;
 import com.infyro.ifc.repository.FarmRepo;
 import com.infyro.ifc.repository.FieldRepo;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FieldService {
@@ -43,6 +45,7 @@ public class FieldService {
                 .build();
 
         Field savedField = fieldRepo.save(field);
+        log.info("FieldService-createField Field got created! \n field={}",field.toString());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(fieldMapper.mapToFieldResponse(savedField));
     }
@@ -58,13 +61,14 @@ public class FieldService {
                 .stream()
                 .map(fieldMapper::mapToFieldResponse)
                 .toList();
-
+        log.info("FieldService-getFieldByFarm Executed! \n Data={}",fields);
         return ResponseEntity.ok(fields);
     }
 
     @Transactional(readOnly = true)
     public ResponseEntity<FieldResponse> getFieldById(Long fieldId, String email) {
         Field field = getOwnedField(fieldId, email);
+        log.info("FieldService-getFieldByID Executed for the ID={} \n Data={}",fieldId,field);
         return ResponseEntity.ok(fieldMapper.mapToFieldResponse(field));
     }
 
@@ -75,6 +79,7 @@ public class FieldService {
         Field field = getOwnedField(fieldId, email);
         field.setFieldName(request.fieldName().trim());
         Field updatedField = fieldRepo.save(field);
+        log.info("FieldService-updateField Field updated! \n  updated_field={}",updatedField.toString());
         return ResponseEntity.ok(fieldMapper.mapToFieldResponse(updatedField));
     }
 
@@ -86,6 +91,7 @@ public class FieldService {
                     "Cannot delete a field while crops are assigned to it");
         }
         fieldRepo.delete(field);
+        log.info("FieldService-deleteField Field deleted with the ID={}",fieldId);
         return ResponseEntity.ok(new APIResponse("Field deleted successfully"));
     }
 
