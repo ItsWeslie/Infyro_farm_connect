@@ -21,10 +21,11 @@ public class CsrfCookieValidator {
     }
 
     public void validate(HttpServletRequest request) {
-        // Browsers send Origin on cross-origin POST requests. Reject mismatches even
-        // when an attacker can cause a request to carry a valid ambient cookie.
+        // Cookie-authenticated state-changing requests must originate from the
+        // configured browser application. Missing Origin is rejected rather than
+        // silently relying on the double-submit token alone.
         String origin = request.getHeader("Origin");
-        if (origin != null && !allowedOrigin.equals(origin)) {
+        if (origin == null || !allowedOrigin.equals(origin)) {
             throw forbidden();
         }
 
