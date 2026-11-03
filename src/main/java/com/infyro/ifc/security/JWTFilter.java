@@ -1,6 +1,6 @@
 package com.infyro.ifc.security;
 
-import com.infyro.ifc.exception.UserNotFoundException;
+import com.infyro.ifc.service.login.RefreshTokenService;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import lombok.extern.slf4j.Slf4j;
@@ -19,31 +19,39 @@ public class JWTFilter extends OncePerRequestFilter {
     private final JWTService jwtService;
     private final ApplicationContext context;
     private final RefreshTokenService sessions;
-    public JWTFilter(JWTService jwtService, ApplicationContext context, RefreshTokenService sessions) {
-        this.jwtService=jwtService; this.context=context; this.sessions=sessions;
-    }
-    public JWTFilter(JWTService jwtService, ApplicationContext context) { this(jwtService,context,null); }
 
-    @Override protected void doFilterInternal(HttpServletRequest request,HttpServletResponse response,
-                                               FilterChain chain)throws ServletException,IOException {
-        String header=request.getHeader("Authorization");
-        if(header!=null && header.startsWith("Bearer ") &&
-                SecurityContextHolder.getContext().getAuthentication()==null) authenticate(header.substring(7),request);
-        chain.doFilter(request,response);
+    public JWTFilter(JWTService jwtService, ApplicationContext context, RefreshTokenService sessions) {
+        this.jwtService = jwtService;
+        this.context = context;
+        this.sessions = sessions;
     }
-    private void authenticate(String token,HttpServletRequest request) {
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+                                    FilterChain chain) throws ServletException, IOException {
+        String header = request.getHeader("Authorization");
+        if (header != null && header.startsWith("Bearer ")
+                && SecurityContextHolder.getContext().getAuthentication() == null) {
+            authenticate(header.substring(7), request);
+        }
+        chain.doFilter(request, response);
+    }
+
+    private void authenticate(String token, HttpServletRequest request) {
         try {
-            String username=jwtService.extractUsername(token), family=jwtService.extractSessionId(token);
-            if(username==null || username.isBlank() || (sessions!=null && !sessions.isFamilyActive(family))) {
-                SecurityContextHolder.clearContext(); return;
+            String username = jwtService.extractUsername(token);
+            String family = jwtService.extractSessionId(token);
+            if (username == null || username.isBlank() || !sessions.isFamilyActive(family)) {
+                SecurityContextHolder.clearContext();
+                return;
             }
-            UserDetails details=context.getBean(UsersDetailService.class).loadUserByUsername(username);
-            if(jwtService.validateToken(token,details)) {
-                var auth=new UsernamePasswordAuthenticationToken(details,null,details.getAuthorities());
+            UserDetails details = context.getBean(UsersDetailService.class).loadUserByUsername(username);
+            if (jwtService.validateToken(token, details)) {
+                var auth = new UsernamePasswordAuthenticationToken(details, null, details.getAuthorities());
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }
-        } catch(RuntimeException e) {
+        } catch (RuntimeException e) {
             log.debug("Ignoring invalid, expired, revoked, or unknown-user access token");
             SecurityContextHolder.clearContext();
         }
