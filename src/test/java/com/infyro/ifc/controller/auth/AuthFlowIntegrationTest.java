@@ -1,7 +1,7 @@
 package com.infyro.ifc.controller.auth;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import com.infyro.ifc.model.User;
 import com.infyro.ifc.repository.RefreshTokenRepo;
 import com.infyro.ifc.repository.UserRepo;
