@@ -5,12 +5,13 @@ import com.infyro.ifc.dto.auth.SignupRequest;
 import com.infyro.ifc.exception.UserAlreadyExistsException;
 import com.infyro.ifc.model.User;
 import com.infyro.ifc.repository.UserRepo;
+import com.infyro.ifc.security.RateLimitService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,44 +20,21 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Slf4j
 public class SignupService {
-
     private final UserRepo userRepo;
     private final PasswordEncoder passwordEncoder;
+    private final RateLimitService rateLimits;
 
     @Transactional
-    public ResponseEntity<APIResponse> signup(@Valid SignupRequest signupRequest) {
-
-        boolean isUserExists = userRepo.existsByEmail(signupRequest.email());
-
-        if (isUserExists) {
-            log.warn("Signup attempted with an email that already exists");
-            throw new UserAlreadyExistsException(
-                    "User already exists with this email id: " + signupRequest.email());
+    public ResponseEntity<APIResponse> signup(@Valid SignupRequest request, HttpServletRequest servletRequest) {
+        rateLimits.check("signup:" + servletRequest.getRemoteAddr(), 5, 3600);
+        if (userRepo.existsByEmail(request.email()))
+            throw new UserAlreadyExistsException("User already exists with this email address");
+        User user = User.builder().username(request.name()).email(request.email())
+                .password(passwordEncoder.encode(request.password())).build();
+        try { userRepo.save(user); }
+        catch (DataIntegrityViolationException e) {
+            throw new UserAlreadyExistsException("User already exists with this email address");
         }
-
-        String hashedPassword = passwordEncoder.encode(signupRequest.password());
-
-        User newUser = User.builder()
-                .username(signupRequest.name())
-                .email(signupRequest.email())
-                .password(hashedPassword)
-                .build();
-
-        try {
-            userRepo.save(newUser);
-        } catch (DataIntegrityViolationException e) {
-
-            log.warn("User signup failed because email already exists: {}",
-                    signupRequest.email());
-
-            throw new UserAlreadyExistsException(
-                    "User already exists with this email id: "
-                            + signupRequest.email());
-        }
-
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(new APIResponse("User registered successfully"));
-
+        return ResponseEntity.status(HttpStatus.CREATED).body(new APIResponse("User registered successfully"));
     }
 }

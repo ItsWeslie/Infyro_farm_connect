@@ -1,23 +1,24 @@
 package com.infyro.ifc.controller.auth;
 
 import com.infyro.ifc.api.APIConstants;
-import com.infyro.ifc.dto.APIResponse;
-import com.infyro.ifc.service.login.LogoutService;
+import com.infyro.ifc.security.CsrfCookieValidator;
+import com.infyro.ifc.service.login.RefreshTokenService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 
-@RestController
-@RequiredArgsConstructor
-@RequestMapping(APIConstants.AUTH)
+@RestController @RequiredArgsConstructor @RequestMapping(APIConstants.AUTH)
 public class LogoutController {
-    private final LogoutService logoutService;
-
+    private final RefreshTokenService refreshTokens;
+    private final CsrfCookieValidator csrf;
     @PostMapping(APIConstants.Auth.LOGOUT)
-    public ResponseEntity<APIResponse> logout()
-    {
-        return logoutService.logout();
+    public ResponseEntity<Void> logout(HttpServletRequest request) {
+        csrf.validate(request); return refreshTokens.logout(request);
+    }
+    @PostMapping(APIConstants.Auth.LOGOUT_ALL)
+    public ResponseEntity<Void> logoutAll(Authentication authentication) {
+        refreshTokens.logoutAll(authentication.getName()); return ResponseEntity.noContent().build();
     }
 }
