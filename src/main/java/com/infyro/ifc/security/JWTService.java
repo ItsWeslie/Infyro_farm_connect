@@ -19,7 +19,7 @@ public class JWTService {
     private final String audience;
 
     public JWTService(@Value("${jwt.secret}") String secret,
-                      @Value("${jwt.expiration:PT10M}") java.time.Duration expiration,
+                      @Value("${auth.access-token-lifetime:PT10M}") java.time.Duration expiration,
                       @Value("${jwt.issuer:infyro-farm-connect}") String issuer,
                       @Value("${jwt.audience:infyro-api}") String audience) {
         this.secret = secret; this.expiration = expiration.toMillis();
