@@ -32,13 +32,13 @@ public class FarmSummaryService {
     private final FieldRepo fieldRepo;
     private final CropPlantingRepo cropPlantingRepo;
     private final ExpenseRepo expenseRepo;
-    private final HarvestRecordRepository harvestRecordRepository;
+    private final HarvestRecordRepo harvestRecordRepo;
 
     public FarmSummaryResponse getFarmSummary(Long farmId, String email) {
         Farm farm = getOwnedFarm(farmId, email);
         List<CropPlanting> plantings = cropPlantingRepo.findAllByField_Farm_IdAndField_Farm_Owner_Email(farmId, email);
         List<Expense> expenses = activeExpenses(expenseRepo.findAllByFarm_IdAndFarm_Owner_EmailOrderByExpenseDateDescCreatedAtDesc(farmId, email));
-        List<HarvestRecord> harvests = activeHarvests(harvestRecordRepository.findAllByCropPlanting_Field_Farm_IdAndCropPlanting_Field_Farm_Owner_EmailOrderByHarvestDateDescCreatedAtDesc(farmId, email));
+        List<HarvestRecord> harvests = activeHarvests(harvestRecordRepo.findAllByCropPlanting_Field_Farm_IdAndCropPlanting_Field_Farm_Owner_EmailOrderByHarvestDateDescCreatedAtDesc(farmId, email));
         log.info("FarmSummaryService-getFarmSummary Executed for the FarmID={} \n Data={}",farmId,new FarmSummaryResponse(farm.getId(), farm.getFarmName(),
                 fieldRepo.findAllByFarm_IdAndFarm_Owner_Email(farmId, email).size(),
                 plantings.size(), plantingCounts(plantings), sumExpenses(expenses),
@@ -61,7 +61,7 @@ public class FarmSummaryService {
     public HarvestSummaryResponse getHarvestSummary(Long farmId, String email, LocalDate from, LocalDate to) {
         getOwnedFarm(farmId, email);
         validateDateRange(from, to);
-        List<HarvestRecord> harvests = activeHarvests(harvestRecordRepository.findAllByCropPlanting_Field_Farm_IdAndCropPlanting_Field_Farm_Owner_EmailOrderByHarvestDateDescCreatedAtDesc(farmId, email))
+        List<HarvestRecord> harvests = activeHarvests(harvestRecordRepo.findAllByCropPlanting_Field_Farm_IdAndCropPlanting_Field_Farm_Owner_EmailOrderByHarvestDateDescCreatedAtDesc(farmId, email))
                 .stream().filter(withinRange(HarvestRecord::getHarvestDate, from, to)).toList();
         log.info("FarmSummaryService-getHarvestSummary Executed for the FarmID={} \n Harvest_Data={}",farmId,new HarvestSummaryResponse(farmId, from, to, harvests.size(), harvestsByUnit(harvests)));
         return new HarvestSummaryResponse(farmId, from, to, harvests.size(), harvestsByUnit(harvests));

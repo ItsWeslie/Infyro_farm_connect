@@ -10,7 +10,7 @@ import com.infyro.ifc.model.Farm;
 import com.infyro.ifc.model.User;
 import com.infyro.ifc.repository.ExpenseRepo;
 import com.infyro.ifc.repository.FarmRepo;
-import com.infyro.ifc.repository.HarvestRecordRepository;
+import com.infyro.ifc.repository.HarvestRecordRepo;
 import com.infyro.ifc.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +31,7 @@ public class FarmService {
     private final UserRepo userRepo;
     private final FarmMapper farmMapper;
     private final ExpenseRepo expenseRepo;
-    private final HarvestRecordRepository harvestRecordRepository;
+    private final HarvestRecordRepo harvestRecordRepo;
 
     @Transactional
     public ResponseEntity<FarmResponse> createNewFarm(FarmRequest req, String email) {
@@ -72,7 +72,7 @@ public class FarmService {
         }
 
         if (expenseRepo.existsByFarm_Id(id)
-                || harvestRecordRepository.existsByCropPlanting_Field_Farm_Id(id)) {
+                || harvestRecordRepo.existsByCropPlanting_Field_Farm_Id(id)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "Farm cannot be deleted while expense or harvest history exists");
         }

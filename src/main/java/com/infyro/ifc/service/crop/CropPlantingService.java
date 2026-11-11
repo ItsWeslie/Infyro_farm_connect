@@ -13,7 +13,7 @@ import com.infyro.ifc.repository.CropPlantingRepo;
 import com.infyro.ifc.repository.CropTypeRepository;
 import com.infyro.ifc.repository.ExpenseRepo;
 import com.infyro.ifc.repository.FieldRepo;
-import com.infyro.ifc.repository.HarvestRecordRepository;
+import com.infyro.ifc.repository.HarvestRecordRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -36,7 +36,7 @@ public class CropPlantingService {
     private final FieldRepo fieldRepo;
     private final CropPlantingMapper cropPlantingMapper;
     private final ExpenseRepo expenseRepo;
-    private final HarvestRecordRepository harvestRecordRepository;
+    private final HarvestRecordRepo harvestRecordRepo;
     private final CropActivityLogRepository activityLogRepository;
 
     @Transactional
@@ -121,7 +121,7 @@ public class CropPlantingService {
                     "Completed or cancelled plantings cannot be updated");
         }
 
-        if (harvestRecordRepository.existsByCropPlanting_Id(id)) {
+        if (harvestRecordRepo.existsByCropPlanting_Id(id)) {
 
             boolean plantingDateChanged = !planting.getPlantedOn().equals(request.plantedOn());
 
@@ -206,7 +206,7 @@ public class CropPlantingService {
                     "Only planned plantings can be deleted; cancel active plantings instead");
         }
         if (expenseRepo.existsByCropPlanting_Id(id)
-                || harvestRecordRepository.existsByCropPlanting_Id(id)
+                || harvestRecordRepo.existsByCropPlanting_Id(id)
                 || activityLogRepository.existsByCropPlanting_Id(id)) {
 
             log.error("CropPlantingService-delete Failed! " +

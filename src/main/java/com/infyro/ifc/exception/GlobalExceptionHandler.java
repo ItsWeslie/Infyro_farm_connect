@@ -106,6 +106,11 @@ public class GlobalExceptionHandler {
         return error(HttpStatus.NOT_FOUND, "EXPENSE_NOT_FOUND", e.getMessage());
     }
 
+    @ExceptionHandler(HarvestRecordNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleHarvestRecordNotFoundException(HarvestRecordNotFoundException e) {
+        return error(HttpStatus.NOT_FOUND, "HARVEST_RECORD_NOT_FOUND", e.getMessage());
+    }
+
     private ResponseEntity<ApiErrorResponse> error(HttpStatus status, String code, String message) {
         return ResponseEntity.status(status).body(new ApiErrorResponse(
                 status.value(),

@@ -7,7 +7,7 @@ import com.infyro.ifc.model.Field;
 import com.infyro.ifc.repository.CropPlantingRepo;
 import com.infyro.ifc.repository.CropActivityLogRepository;
 import com.infyro.ifc.repository.ExpenseRepo;
-import com.infyro.ifc.repository.HarvestRecordRepository;
+import com.infyro.ifc.repository.HarvestRecordRepo;
 import com.infyro.ifc.repository.CropTypeRepository;
 import com.infyro.ifc.repository.FieldRepo;
 import com.infyro.ifc.service.crop.CropPlantingService;
@@ -46,7 +46,7 @@ class CropPlantingServiceTest {
     private CropPlantingMapper cropPlantingMapper;
 
     @Mock private ExpenseRepo expenseRepo;
-    @Mock private HarvestRecordRepository harvestRecordRepository;
+    @Mock private HarvestRecordRepo harvestRecordRepo;
     @Mock private CropActivityLogRepository activityLogRepository;
 
     @InjectMocks
@@ -163,7 +163,7 @@ class CropPlantingServiceTest {
     @Test
     void refusesDeletingPlantingWithHarvestHistory() {
         when(expenseRepo.existsByCropPlanting_Id(PLANTING_ID)).thenReturn(false);
-        when(harvestRecordRepository.existsByCropPlanting_Id(PLANTING_ID)).thenReturn(true);
+        when(harvestRecordRepo.existsByCropPlanting_Id(PLANTING_ID)).thenReturn(true);
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
                 () -> service.delete(PLANTING_ID, EMAIL));
@@ -175,7 +175,7 @@ class CropPlantingServiceTest {
     @Test
     void refusesDeletingPlantingWithActivityHistory() {
         when(expenseRepo.existsByCropPlanting_Id(PLANTING_ID)).thenReturn(false);
-        when(harvestRecordRepository.existsByCropPlanting_Id(PLANTING_ID)).thenReturn(false);
+        when(harvestRecordRepo.existsByCropPlanting_Id(PLANTING_ID)).thenReturn(false);
         when(activityLogRepository.existsByCropPlanting_Id(PLANTING_ID)).thenReturn(true);
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,

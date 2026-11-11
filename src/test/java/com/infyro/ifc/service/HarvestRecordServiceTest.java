@@ -7,7 +7,7 @@ import com.infyro.ifc.model.CropPlanting;
 import com.infyro.ifc.model.HarvestRecord;
 import com.infyro.ifc.dto.harvest.HarvestRecordResponse;
 import com.infyro.ifc.repository.CropPlantingRepo;
-import com.infyro.ifc.repository.HarvestRecordRepository;
+import com.infyro.ifc.repository.HarvestRecordRepo;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,7 +28,8 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class HarvestRecordServiceTest {
-    @Mock HarvestRecordRepository records;
+    @Mock
+    HarvestRecordRepo records;
     @Mock CropPlantingRepo plantings;
     @InjectMocks HarvestRecordService service;
 

@@ -4,7 +4,7 @@ import com.infyro.ifc.mapper.FarmMapper;
 import com.infyro.ifc.exception.FarmNotFoundException;
 import com.infyro.ifc.repository.ExpenseRepo;
 import com.infyro.ifc.repository.FarmRepo;
-import com.infyro.ifc.repository.HarvestRecordRepository;
+import com.infyro.ifc.repository.HarvestRecordRepo;
 import com.infyro.ifc.repository.UserRepo;
 import com.infyro.ifc.service.farm.FarmService;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,8 @@ class FarmServiceTest {
     @Mock FarmMapper farmMapper;
     @Mock
     ExpenseRepo expenseRepo;
-    @Mock HarvestRecordRepository harvestRecordRepository;
+    @Mock
+    HarvestRecordRepo harvestRecordRepo;
     @InjectMocks
     FarmService service;
 
@@ -57,7 +58,7 @@ class FarmServiceTest {
     void refusesDeletingFarmWithHarvestHistory() {
         when(farmRepo.existsByIdAndOwner_Email(10L, "owner@example.com")).thenReturn(true);
         when(expenseRepo.existsByFarm_Id(10L)).thenReturn(false);
-        when(harvestRecordRepository.existsByCropPlanting_Field_Farm_Id(10L)).thenReturn(true);
+        when(harvestRecordRepo.existsByCropPlanting_Field_Farm_Id(10L)).thenReturn(true);
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
                 () -> service.deleteFarm(10L, "owner@example.com"));

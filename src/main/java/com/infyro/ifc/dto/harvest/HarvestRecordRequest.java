@@ -11,11 +11,14 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public record HarvestRecordRequest(
-        @NotNull @PastOrPresent(message = "Harvest date cannot be in the future")
+        @NotNull
+        @PastOrPresent(message = "Harvest date cannot be in the future")
         LocalDate harvestDate,
-        @NotNull @DecimalMin(value = "0.001", message = "Quantity must be greater than zero")
+        @NotNull
+        @DecimalMin(value = "0.001", message = "Quantity must be greater than zero")
         @Digits(integer = 11, fraction = 3, message = "Quantity must have at most 11 integer digits and 3 decimal places")
         BigDecimal quantity,
-        @NotNull HarvestUnit unit,
+        @NotNull
+        HarvestUnit unit,
         @Size(max = 2000) String notes
 ) {}

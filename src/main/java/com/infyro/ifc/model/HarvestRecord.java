@@ -14,7 +14,13 @@ import java.time.LocalDate;
 @Table(name = "harvest_records", indexes = {
         @Index(name = "idx_harvest_planting_date", columnList = "crop_planting_id, harvestDate")
 })
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder @Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class HarvestRecord {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false)

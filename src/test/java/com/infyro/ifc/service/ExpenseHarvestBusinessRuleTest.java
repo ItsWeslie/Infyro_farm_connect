@@ -7,7 +7,7 @@ import com.infyro.ifc.model.Expense;
 import com.infyro.ifc.model.HarvestRecord;
 import com.infyro.ifc.repository.CropPlantingRepo;
 import com.infyro.ifc.repository.ExpenseRepo;
-import com.infyro.ifc.repository.HarvestRecordRepository;
+import com.infyro.ifc.repository.HarvestRecordRepo;
 import com.infyro.ifc.service.expense.ExpenseService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,7 +34,7 @@ class ExpenseHarvestBusinessRuleTest {
     private ExpenseRepo expenses;
 
     @Mock
-    private HarvestRecordRepository harvestRecords;
+    private HarvestRecordRepo harvestRecords;
 
     @Mock
     private CropPlantingRepo plantings;

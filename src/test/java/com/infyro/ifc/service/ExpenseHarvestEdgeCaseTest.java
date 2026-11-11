@@ -11,7 +11,7 @@ import com.infyro.ifc.model.HarvestRecord;
 import com.infyro.ifc.repository.CropPlantingRepo;
 import com.infyro.ifc.repository.ExpenseRepo;
 import com.infyro.ifc.repository.FarmRepo;
-import com.infyro.ifc.repository.HarvestRecordRepository;
+import com.infyro.ifc.repository.HarvestRecordRepo;
 import com.infyro.ifc.repository.UserRepo;
 import com.infyro.ifc.mapper.FarmMapper;
 import com.infyro.ifc.service.expense.ExpenseService;
@@ -40,7 +40,7 @@ class ExpenseHarvestEdgeCaseTest {
     @Mock private ExpenseRepo expenses;
     @Mock private FarmRepo farms;
     @Mock private CropPlantingRepo plantings;
-    @Mock private HarvestRecordRepository harvestRecords;
+    @Mock private HarvestRecordRepo harvestRecords;
     @Mock private UserRepo users;
     @Mock private FarmMapper farmMapper;
 

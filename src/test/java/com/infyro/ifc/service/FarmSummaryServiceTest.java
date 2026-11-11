@@ -26,7 +26,8 @@ class FarmSummaryServiceTest {
     @Mock CropPlantingRepo cropPlantingRepo;
     @Mock
     ExpenseRepo expenseRepo;
-    @Mock HarvestRecordRepository harvestRecordRepository;
+    @Mock
+    HarvestRecordRepo harvestRecordRepo;
     @InjectMocks
     FarmSummaryService service;
 
@@ -52,7 +53,7 @@ class FarmSummaryServiceTest {
                 .thenReturn(List.of(planned, active));
         when(expenseRepo.findAllByFarm_IdAndFarm_Owner_EmailOrderByExpenseDateDescCreatedAtDesc(5L, "owner@example.com"))
                 .thenReturn(List.of(validExpense, voidedExpense));
-        when(harvestRecordRepository.findAllByCropPlanting_Field_Farm_IdAndCropPlanting_Field_Farm_Owner_EmailOrderByHarvestDateDescCreatedAtDesc(5L, "owner@example.com"))
+        when(harvestRecordRepo.findAllByCropPlanting_Field_Farm_IdAndCropPlanting_Field_Farm_Owner_EmailOrderByHarvestDateDescCreatedAtDesc(5L, "owner@example.com"))
                 .thenReturn(List.of(kilo, tonne, voidedHarvest));
 
         var result = service.getFarmSummary(5L, "owner@example.com");

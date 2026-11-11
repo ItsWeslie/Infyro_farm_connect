@@ -7,7 +7,7 @@ import com.infyro.ifc.repository.CropPlantingRepo;
 import com.infyro.ifc.repository.CropTypeRepository;
 import com.infyro.ifc.repository.ExpenseRepo;
 import com.infyro.ifc.repository.FieldRepo;
-import com.infyro.ifc.repository.HarvestRecordRepository;
+import com.infyro.ifc.repository.HarvestRecordRepo;
 import com.infyro.ifc.mapper.CropPlantingMapper;
 import com.infyro.ifc.service.crop.CropPlantingService;
 import org.junit.jupiter.api.Test;
@@ -36,7 +36,7 @@ class CropPlantingDeletionSafeguardTest {
     @Mock private FieldRepo fieldRepo;
     @Mock private CropPlantingMapper cropPlantingMapper;
     @Mock private ExpenseRepo expenseRepo;
-    @Mock private HarvestRecordRepository harvestRecordRepository;
+    @Mock private HarvestRecordRepo harvestRecordRepo;
     @Mock private CropActivityLogRepository activityLogRepository;
 
     @InjectMocks private CropPlantingService service;
@@ -48,7 +48,7 @@ class CropPlantingDeletionSafeguardTest {
 
         assertConflictAndNoDelete();
 
-        verify(harvestRecordRepository, never()).existsByCropPlanting_Id(PLANTING_ID);
+        verify(harvestRecordRepo, never()).existsByCropPlanting_Id(PLANTING_ID);
         verify(activityLogRepository, never()).existsByCropPlanting_Id(PLANTING_ID);
     }
 
@@ -56,7 +56,7 @@ class CropPlantingDeletionSafeguardTest {
     void blocksDeletionWhenHarvestHistoryExists() {
         givenPlannedPlanting();
         when(expenseRepo.existsByCropPlanting_Id(PLANTING_ID)).thenReturn(false);
-        when(harvestRecordRepository.existsByCropPlanting_Id(PLANTING_ID)).thenReturn(true);
+        when(harvestRecordRepo.existsByCropPlanting_Id(PLANTING_ID)).thenReturn(true);
 
         assertConflictAndNoDelete();
 
@@ -67,7 +67,7 @@ class CropPlantingDeletionSafeguardTest {
     void blocksDeletionWhenActivityHistoryExists() {
         givenPlannedPlanting();
         when(expenseRepo.existsByCropPlanting_Id(PLANTING_ID)).thenReturn(false);
-        when(harvestRecordRepository.existsByCropPlanting_Id(PLANTING_ID)).thenReturn(false);
+        when(harvestRecordRepo.existsByCropPlanting_Id(PLANTING_ID)).thenReturn(false);
         when(activityLogRepository.existsByCropPlanting_Id(PLANTING_ID)).thenReturn(true);
 
         assertConflictAndNoDelete();
@@ -87,7 +87,7 @@ class CropPlantingDeletionSafeguardTest {
 
         assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
         verify(expenseRepo, never()).existsByCropPlanting_Id(PLANTING_ID);
-        verify(harvestRecordRepository, never()).existsByCropPlanting_Id(PLANTING_ID);
+        verify(harvestRecordRepo, never()).existsByCropPlanting_Id(PLANTING_ID);
         verify(activityLogRepository, never()).existsByCropPlanting_Id(PLANTING_ID);
         verify(plantingRepository, never()).delete(active);
         verify(fieldRepo, never()).findOwnedFieldForUpdate(org.mockito.ArgumentMatchers.anyLong(),
