@@ -5,6 +5,7 @@ import com.infyro.ifc.dto.expense.ExpenseResponse;
 import com.infyro.ifc.enums.ExpenseCategory;
 import com.infyro.ifc.model.*;
 import com.infyro.ifc.repository.*;
+import com.infyro.ifc.service.expense.ExpenseService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,10 +26,12 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ExpenseServiceTest {
-    @Mock ExpenseRepository expenses;
+    @Mock
+    ExpenseRepo expenses;
     @Mock FarmRepo farms;
     @Mock CropPlantingRepo plantings;
-    @InjectMocks ExpenseService service;
+    @InjectMocks
+    ExpenseService service;
 
     @Test
     void rejectsFarmNotOwnedByCaller() {

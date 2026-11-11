@@ -6,8 +6,9 @@ import com.infyro.ifc.model.CropPlanting;
 import com.infyro.ifc.model.Expense;
 import com.infyro.ifc.model.HarvestRecord;
 import com.infyro.ifc.repository.CropPlantingRepo;
-import com.infyro.ifc.repository.ExpenseRepository;
+import com.infyro.ifc.repository.ExpenseRepo;
 import com.infyro.ifc.repository.HarvestRecordRepository;
+import com.infyro.ifc.service.expense.ExpenseService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,7 +31,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ExpenseHarvestBusinessRuleTest {
     @Mock
-    private ExpenseRepository expenses;
+    private ExpenseRepo expenses;
 
     @Mock
     private HarvestRecordRepository harvestRecords;
@@ -51,7 +52,7 @@ class ExpenseHarvestBusinessRuleTest {
                 .thenReturn(Optional.of(alreadyVoided));
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-                () -> expenseService.delete(11L, "owner@example.com"));
+                () -> expenseService.deleteBy(11L, "owner@example.com"));
 
         assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
         verify(expenses, never()).save(any(Expense.class));

@@ -5,7 +5,7 @@ import com.infyro.ifc.dto.api.ApiResponse;
 import com.infyro.ifc.dto.field.FieldRequest;
 import com.infyro.ifc.dto.field.FieldResponse;
 import com.infyro.ifc.dto.field.FieldUpdateRequest;
-import com.infyro.ifc.service.FieldService;
+import com.infyro.ifc.service.field.FieldService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

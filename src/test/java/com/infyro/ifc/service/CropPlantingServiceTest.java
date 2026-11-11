@@ -6,7 +6,7 @@ import com.infyro.ifc.model.CropPlanting;
 import com.infyro.ifc.model.Field;
 import com.infyro.ifc.repository.CropPlantingRepo;
 import com.infyro.ifc.repository.CropActivityLogRepository;
-import com.infyro.ifc.repository.ExpenseRepository;
+import com.infyro.ifc.repository.ExpenseRepo;
 import com.infyro.ifc.repository.HarvestRecordRepository;
 import com.infyro.ifc.repository.CropTypeRepository;
 import com.infyro.ifc.repository.FieldRepo;
@@ -45,7 +45,7 @@ class CropPlantingServiceTest {
     @Mock
     private CropPlantingMapper cropPlantingMapper;
 
-    @Mock private ExpenseRepository expenseRepository;
+    @Mock private ExpenseRepo expenseRepo;
     @Mock private HarvestRecordRepository harvestRecordRepository;
     @Mock private CropActivityLogRepository activityLogRepository;
 
@@ -151,7 +151,7 @@ class CropPlantingServiceTest {
 
     @Test
     void refusesDeletingPlantingWithExpenseHistory() {
-        when(expenseRepository.existsByCropPlanting_Id(PLANTING_ID)).thenReturn(true);
+        when(expenseRepo.existsByCropPlanting_Id(PLANTING_ID)).thenReturn(true);
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
                 () -> service.delete(PLANTING_ID, EMAIL));
@@ -162,7 +162,7 @@ class CropPlantingServiceTest {
 
     @Test
     void refusesDeletingPlantingWithHarvestHistory() {
-        when(expenseRepository.existsByCropPlanting_Id(PLANTING_ID)).thenReturn(false);
+        when(expenseRepo.existsByCropPlanting_Id(PLANTING_ID)).thenReturn(false);
         when(harvestRecordRepository.existsByCropPlanting_Id(PLANTING_ID)).thenReturn(true);
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
@@ -174,7 +174,7 @@ class CropPlantingServiceTest {
 
     @Test
     void refusesDeletingPlantingWithActivityHistory() {
-        when(expenseRepository.existsByCropPlanting_Id(PLANTING_ID)).thenReturn(false);
+        when(expenseRepo.existsByCropPlanting_Id(PLANTING_ID)).thenReturn(false);
         when(harvestRecordRepository.existsByCropPlanting_Id(PLANTING_ID)).thenReturn(false);
         when(activityLogRepository.existsByCropPlanting_Id(PLANTING_ID)).thenReturn(true);
 

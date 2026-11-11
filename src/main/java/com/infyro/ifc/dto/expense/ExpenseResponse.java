@@ -1,11 +1,25 @@
 package com.infyro.ifc.dto.expense;
 
 import com.infyro.ifc.enums.ExpenseCategory;
+import lombok.Builder;
+
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 
-public record ExpenseResponse(Long id, Long farmId, Long cropPlantingId,
-        BigDecimal amount, LocalDate expenseDate, ExpenseCategory category,
-        String description, Instant createdAt, Instant updatedAt,
-        boolean voided, String statusLabel, Instant voidedAt, String voidReason) {}
+@Builder
+public record ExpenseResponse(
+        Long id,
+        Long farmId,
+        Long cropPlantingId,
+        BigDecimal amount,
+        LocalDate expenseDate,
+        ExpenseCategory category,
+        String description,
+        Instant createdAt,
+        Instant updatedAt,
+        boolean voided,
+        String statusLabel,
+        Instant voidedAt,
+        String voidReason
+) {}

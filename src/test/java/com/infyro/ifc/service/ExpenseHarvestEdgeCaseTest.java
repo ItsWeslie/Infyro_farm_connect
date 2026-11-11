@@ -9,11 +9,12 @@ import com.infyro.ifc.model.Farm;
 import com.infyro.ifc.model.Field;
 import com.infyro.ifc.model.HarvestRecord;
 import com.infyro.ifc.repository.CropPlantingRepo;
-import com.infyro.ifc.repository.ExpenseRepository;
+import com.infyro.ifc.repository.ExpenseRepo;
 import com.infyro.ifc.repository.FarmRepo;
 import com.infyro.ifc.repository.HarvestRecordRepository;
 import com.infyro.ifc.repository.UserRepo;
 import com.infyro.ifc.mapper.FarmMapper;
+import com.infyro.ifc.service.expense.ExpenseService;
 import com.infyro.ifc.service.farm.FarmService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,7 +37,7 @@ import static org.mockito.Mockito.*;
 class ExpenseHarvestEdgeCaseTest {
     private static final String OWNER = "owner@example.com";
 
-    @Mock private ExpenseRepository expenses;
+    @Mock private ExpenseRepo expenses;
     @Mock private FarmRepo farms;
     @Mock private CropPlantingRepo plantings;
     @Mock private HarvestRecordRepository harvestRecords;

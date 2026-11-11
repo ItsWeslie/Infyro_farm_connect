@@ -11,7 +11,7 @@ import com.infyro.ifc.model.Field;
 import com.infyro.ifc.repository.CropActivityLogRepository;
 import com.infyro.ifc.repository.CropPlantingRepo;
 import com.infyro.ifc.repository.CropTypeRepository;
-import com.infyro.ifc.repository.ExpenseRepository;
+import com.infyro.ifc.repository.ExpenseRepo;
 import com.infyro.ifc.repository.FieldRepo;
 import com.infyro.ifc.repository.HarvestRecordRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +35,7 @@ public class CropPlantingService {
     private final CropTypeRepository cropTypeRepository;
     private final FieldRepo fieldRepo;
     private final CropPlantingMapper cropPlantingMapper;
-    private final ExpenseRepository expenseRepository;
+    private final ExpenseRepo expenseRepo;
     private final HarvestRecordRepository harvestRecordRepository;
     private final CropActivityLogRepository activityLogRepository;
 
@@ -140,9 +140,12 @@ public class CropPlantingService {
         BigDecimal difference = request.cropArea().subtract(planting.getCropArea());
 
         if (difference.compareTo(field.getAvailableArea()) > 0) {
-            log.error("CropPlantingService-update Failed! " +
-                    "Insufficient available field area \n available_area = {} " +
-                    "\n crop_area = {}",field.getAvailableArea(),difference);
+            log.error("""
+                    CropPlantingService-update Failed! \
+                    Insufficient available field area\s
+                     available_area = {} \
+                    
+                     crop_area = {}""",field.getAvailableArea(),difference);
 
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Insufficient available field area");
         }
@@ -202,7 +205,7 @@ public class CropPlantingService {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "Only planned plantings can be deleted; cancel active plantings instead");
         }
-        if (expenseRepository.existsByCropPlanting_Id(id)
+        if (expenseRepo.existsByCropPlanting_Id(id)
                 || harvestRecordRepository.existsByCropPlanting_Id(id)
                 || activityLogRepository.existsByCropPlanting_Id(id)) {
 
@@ -245,9 +248,12 @@ public class CropPlantingService {
                 ? request.maturityTimeInDays() : cropType.getDefaultMaturityTimeInDays();
 
         if (maturity == null || maturity <= 0) {
-            log.error("CropPlantingService-resolveMaturity Failed! " +
-                    "Provide maturity days or configure a crop type default \n " +
-                    "CropType={} \n Data={}",cropType.toString(), request);
+            log.error("""
+                    CropPlantingService-resolveMaturity Failed! \
+                    Provide maturity days or configure a crop type default\s
+                     \
+                    CropType={}\s
+                     Data={}""",cropType.toString(), request);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Provide maturity days or configure a crop type default");
         }

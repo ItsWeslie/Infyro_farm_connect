@@ -1,4 +1,4 @@
-package com.infyro.ifc.service;
+package com.infyro.ifc.service.field;
 
 import com.infyro.ifc.dto.api.ApiResponse;
 import com.infyro.ifc.dto.field.FieldRequest;
@@ -45,7 +45,7 @@ public class FieldService {
                 .build();
 
         Field savedField = fieldRepo.save(field);
-        log.info("FieldService-createField Field got created! \n field={}",field.toString());
+        log.info("FieldService-createField Field got created! \n field={}",field);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(fieldMapper.mapToFieldResponse(savedField));
     }
@@ -79,7 +79,7 @@ public class FieldService {
         Field field = getOwnedField(fieldId, email);
         field.setFieldName(request.fieldName().trim());
         Field updatedField = fieldRepo.save(field);
-        log.info("FieldService-updateField Field updated! \n  updated_field={}",updatedField.toString());
+        log.info("FieldService-updateField Field updated! \n  updated_field={}",updatedField);
         return ResponseEntity.ok(fieldMapper.mapToFieldResponse(updatedField));
     }
 

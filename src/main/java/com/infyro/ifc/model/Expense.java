@@ -11,11 +11,16 @@ import java.time.Instant;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "expenses", indexes = {
+@Table(name = "expenses",
+        indexes = {
         @Index(name = "idx_expense_farm_date", columnList = "farm_id, expenseDate"),
         @Index(name = "idx_expense_planting_id", columnList = "crop_planting_id")
 })
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder @Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Expense {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false)

@@ -8,7 +8,7 @@ import com.infyro.ifc.exception.UserNotFoundException;
 import com.infyro.ifc.mapper.FarmMapper;
 import com.infyro.ifc.model.Farm;
 import com.infyro.ifc.model.User;
-import com.infyro.ifc.repository.ExpenseRepository;
+import com.infyro.ifc.repository.ExpenseRepo;
 import com.infyro.ifc.repository.FarmRepo;
 import com.infyro.ifc.repository.HarvestRecordRepository;
 import com.infyro.ifc.repository.UserRepo;
@@ -30,7 +30,7 @@ public class FarmService {
     private final FarmRepo farmRepo;
     private final UserRepo userRepo;
     private final FarmMapper farmMapper;
-    private final ExpenseRepository expenseRepository;
+    private final ExpenseRepo expenseRepo;
     private final HarvestRecordRepository harvestRecordRepository;
 
     @Transactional
@@ -71,7 +71,7 @@ public class FarmService {
             throw new FarmNotFoundException("Farm not found with given id: " + id);
         }
 
-        if (expenseRepository.existsByFarm_Id(id)
+        if (expenseRepo.existsByFarm_Id(id)
                 || harvestRecordRepository.existsByCropPlanting_Field_Farm_Id(id)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "Farm cannot be deleted while expense or harvest history exists");
@@ -88,7 +88,7 @@ public class FarmService {
                 .orElseThrow(() -> new FarmNotFoundException("Farm not found with given id: " + id));
         oldFarm.setFarmName(request.farmName());
         Farm updatedFarm = farmRepo.save(oldFarm);
-        log.info("FarmService-updateFarm farm updated! \n updated_farm={}",updatedFarm.toString());
+        log.info("FarmService-updateFarm farm updated! \n updated_farm={}",updatedFarm);
         return ResponseEntity.ok(farmMapper.mapToFarmResponse(updatedFarm));
     }
 }

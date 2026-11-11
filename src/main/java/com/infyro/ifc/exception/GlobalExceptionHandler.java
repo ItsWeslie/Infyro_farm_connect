@@ -95,6 +95,17 @@ public class GlobalExceptionHandler {
                 "An unexpected error occurred");
     }
 
+    @ExceptionHandler(CropPlantingNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleCropPlantingNotFoundException(
+            CropPlantingNotFoundException e) {
+        return error(HttpStatus.NOT_FOUND, "CROP_PLANTING_NOT_FOUND", e.getMessage());
+    }
+
+    @ExceptionHandler(ExpenseNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleExpenseNotFoundException(ExpenseNotFoundException e) {
+        return error(HttpStatus.NOT_FOUND, "EXPENSE_NOT_FOUND", e.getMessage());
+    }
+
     private ResponseEntity<ApiErrorResponse> error(HttpStatus status, String code, String message) {
         return ResponseEntity.status(status).body(new ApiErrorResponse(
                 status.value(),

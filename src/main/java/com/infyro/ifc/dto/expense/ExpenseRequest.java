@@ -13,11 +13,22 @@ import java.time.LocalDate;
 
 public record ExpenseRequest(
         Long cropPlantingId,
-        @NotNull @DecimalMin(value = "0.01", message = "Amount must be greater than zero")
-        @Digits(integer = 12, fraction = 2, message = "Amount must have at most 12 integer digits and 2 decimal places")
+
+        @NotNull
+        @DecimalMin(value = "0.01", message = "Amount must be greater than zero")
+        @Digits(integer = 12,
+                fraction = 2,
+                message = "Amount must have at most 12 integer digits and 2 decimal places")
         BigDecimal amount,
-        @NotNull @PastOrPresent(message = "Expense date cannot be in the future")
+
+        @NotNull
+        @PastOrPresent(message = "Expense date cannot be in the future")
         LocalDate expenseDate,
-        @NotNull ExpenseCategory category,
-        @NotBlank @Size(max = 1000) String description
+
+        @NotNull
+        ExpenseCategory category,
+
+        @NotBlank
+        @Size(max = 1000,message = "Description must be within 1000 characters")
+        String description
 ) {}

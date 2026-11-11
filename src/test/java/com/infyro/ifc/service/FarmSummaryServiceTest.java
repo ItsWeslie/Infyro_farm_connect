@@ -24,7 +24,8 @@ class FarmSummaryServiceTest {
     @Mock FarmRepo farmRepo;
     @Mock FieldRepo fieldRepo;
     @Mock CropPlantingRepo cropPlantingRepo;
-    @Mock ExpenseRepository expenseRepository;
+    @Mock
+    ExpenseRepo expenseRepo;
     @Mock HarvestRecordRepository harvestRecordRepository;
     @InjectMocks
     FarmSummaryService service;
@@ -49,7 +50,7 @@ class FarmSummaryServiceTest {
         when(fieldRepo.findAllByFarm_IdAndFarm_Owner_Email(5L, "owner@example.com")).thenReturn(List.of(new Field()));
         when(cropPlantingRepo.findAllByField_Farm_IdAndField_Farm_Owner_Email(5L, "owner@example.com"))
                 .thenReturn(List.of(planned, active));
-        when(expenseRepository.findAllByFarm_IdAndFarm_Owner_EmailOrderByExpenseDateDescCreatedAtDesc(5L, "owner@example.com"))
+        when(expenseRepo.findAllByFarm_IdAndFarm_Owner_EmailOrderByExpenseDateDescCreatedAtDesc(5L, "owner@example.com"))
                 .thenReturn(List.of(validExpense, voidedExpense));
         when(harvestRecordRepository.findAllByCropPlanting_Field_Farm_IdAndCropPlanting_Field_Farm_Owner_EmailOrderByHarvestDateDescCreatedAtDesc(5L, "owner@example.com"))
                 .thenReturn(List.of(kilo, tonne, voidedHarvest));
@@ -77,7 +78,7 @@ class FarmSummaryServiceTest {
                         LocalDate.of(2026, 10, 10), LocalDate.of(2026, 10, 1)));
 
         assertEquals(400, error.getStatusCode().value());
-        verifyNoInteractions(expenseRepository);
+        verifyNoInteractions(expenseRepo);
     }
 
     @Test

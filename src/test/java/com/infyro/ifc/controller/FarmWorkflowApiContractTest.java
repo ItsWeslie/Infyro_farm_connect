@@ -8,7 +8,7 @@ import com.infyro.ifc.dto.expense.ExpenseResponse;
 import com.infyro.ifc.dto.harvest.HarvestRecordRequest;
 import com.infyro.ifc.dto.harvest.HarvestRecordResponse;
 import com.infyro.ifc.exception.GlobalExceptionHandler;
-import com.infyro.ifc.service.ExpenseService;
+import com.infyro.ifc.service.expense.ExpenseService;
 import com.infyro.ifc.service.farm.FarmSummaryService;
 import com.infyro.ifc.service.HarvestRecordService;
 import org.junit.jupiter.api.Test;

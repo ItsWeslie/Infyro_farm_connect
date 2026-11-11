@@ -2,7 +2,7 @@ package com.infyro.ifc.service;
 
 import com.infyro.ifc.mapper.FarmMapper;
 import com.infyro.ifc.exception.FarmNotFoundException;
-import com.infyro.ifc.repository.ExpenseRepository;
+import com.infyro.ifc.repository.ExpenseRepo;
 import com.infyro.ifc.repository.FarmRepo;
 import com.infyro.ifc.repository.HarvestRecordRepository;
 import com.infyro.ifc.repository.UserRepo;
@@ -23,7 +23,8 @@ class FarmServiceTest {
     @Mock FarmRepo farmRepo;
     @Mock UserRepo userRepo;
     @Mock FarmMapper farmMapper;
-    @Mock ExpenseRepository expenseRepository;
+    @Mock
+    ExpenseRepo expenseRepo;
     @Mock HarvestRecordRepository harvestRecordRepository;
     @InjectMocks
     FarmService service;
@@ -43,7 +44,7 @@ class FarmServiceTest {
     @Test
     void refusesDeletingFarmWithExpenseHistory() {
         when(farmRepo.existsByIdAndOwner_Email(10L, "owner@example.com")).thenReturn(true);
-        when(expenseRepository.existsByFarm_Id(10L)).thenReturn(true);
+        when(expenseRepo.existsByFarm_Id(10L)).thenReturn(true);
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
                 () -> service.deleteFarm(10L, "owner@example.com"));
@@ -55,7 +56,7 @@ class FarmServiceTest {
     @Test
     void refusesDeletingFarmWithHarvestHistory() {
         when(farmRepo.existsByIdAndOwner_Email(10L, "owner@example.com")).thenReturn(true);
-        when(expenseRepository.existsByFarm_Id(10L)).thenReturn(false);
+        when(expenseRepo.existsByFarm_Id(10L)).thenReturn(false);
         when(harvestRecordRepository.existsByCropPlanting_Field_Farm_Id(10L)).thenReturn(true);
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,

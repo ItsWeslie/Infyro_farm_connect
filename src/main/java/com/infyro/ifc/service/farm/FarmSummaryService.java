@@ -31,13 +31,13 @@ public class FarmSummaryService {
     private final FarmRepo farmRepo;
     private final FieldRepo fieldRepo;
     private final CropPlantingRepo cropPlantingRepo;
-    private final ExpenseRepository expenseRepository;
+    private final ExpenseRepo expenseRepo;
     private final HarvestRecordRepository harvestRecordRepository;
 
     public FarmSummaryResponse getFarmSummary(Long farmId, String email) {
         Farm farm = getOwnedFarm(farmId, email);
         List<CropPlanting> plantings = cropPlantingRepo.findAllByField_Farm_IdAndField_Farm_Owner_Email(farmId, email);
-        List<Expense> expenses = activeExpenses(expenseRepository.findAllByFarm_IdAndFarm_Owner_EmailOrderByExpenseDateDescCreatedAtDesc(farmId, email));
+        List<Expense> expenses = activeExpenses(expenseRepo.findAllByFarm_IdAndFarm_Owner_EmailOrderByExpenseDateDescCreatedAtDesc(farmId, email));
         List<HarvestRecord> harvests = activeHarvests(harvestRecordRepository.findAllByCropPlanting_Field_Farm_IdAndCropPlanting_Field_Farm_Owner_EmailOrderByHarvestDateDescCreatedAtDesc(farmId, email));
         log.info("FarmSummaryService-getFarmSummary Executed for the FarmID={} \n Data={}",farmId,new FarmSummaryResponse(farm.getId(), farm.getFarmName(),
                 fieldRepo.findAllByFarm_IdAndFarm_Owner_Email(farmId, email).size(),
@@ -52,7 +52,7 @@ public class FarmSummaryService {
     public ExpenseSummaryResponse getExpenseSummary(Long farmId, String email, LocalDate from, LocalDate to) {
         getOwnedFarm(farmId, email);
         validateDateRange(from, to);
-        List<Expense> expenses = activeExpenses(expenseRepository.findAllByFarm_IdAndFarm_Owner_EmailOrderByExpenseDateDescCreatedAtDesc(farmId, email))
+        List<Expense> expenses = activeExpenses(expenseRepo.findAllByFarm_IdAndFarm_Owner_EmailOrderByExpenseDateDescCreatedAtDesc(farmId, email))
                 .stream().filter(withinRange(Expense::getExpenseDate, from, to)).toList();
         log.info("FarmSummaryService-getExpenseSummary Executed for the FarmID={} \n Expense_Data={}",farmId,new ExpenseSummaryResponse(farmId, from, to, expenses.size(), sumExpenses(expenses), expensesByCategory(expenses)));
         return new ExpenseSummaryResponse(farmId, from, to, expenses.size(), sumExpenses(expenses), expensesByCategory(expenses));
