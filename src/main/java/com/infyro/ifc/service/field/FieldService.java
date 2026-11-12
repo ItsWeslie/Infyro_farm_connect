@@ -57,7 +57,7 @@ public class FieldService {
                 .orElseThrow(() -> new FarmNotFoundException("Farm not found"));
 
         List<FieldResponse> fields = fieldRepo
-                .findAllByFarm_IdAndFarm_Owner_Email(farm.getId(), email)
+                .findByFarm(farm.getId(), email)
                 .stream()
                 .map(fieldMapper::mapToFieldResponse)
                 .toList();
