@@ -5,7 +5,7 @@ import com.infyro.ifc.enums.CropPlantingStatus;
 import com.infyro.ifc.enums.ExpenseCategory;
 import com.infyro.ifc.enums.HarvestUnit;
 import com.infyro.ifc.exception.FarmNotFoundException;
-import com.infyro.ifc.model.*;
+import com.infyro.ifc.model.Farm;
 import com.infyro.ifc.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,14 +13,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +27,7 @@ import java.util.stream.Collectors;
 public class FarmSummaryService {
 
     private static final BigDecimal ZERO = BigDecimal.ZERO;
+
     private final FarmRepo farmRepo;
     private final FieldRepo fieldRepo;
     private final CropPlantingRepo cropPlantingRepo;
@@ -36,25 +35,35 @@ public class FarmSummaryService {
     private final HarvestRecordRepo harvestRecordRepo;
 
     public FarmSummaryResponse getFarmSummary(Long farmId, String email) {
-
         Farm farm = getOwnedFarm(farmId, email);
 
-        List<CropPlanting> plantings = getCropPlantings(farmId, email);
+        long totalFields = fieldRepo.countByFarm(farmId, email);
 
-        List<Expense> expenses = activeExpenses(farmId, email);
+        List<CropPlantingRepo.StatusCount> plantingTotals =
+                cropPlantingRepo.countByFarmGroupedByStatus(farmId, email);
+        Map<CropPlantingStatus, Long> plantingCounts = plantingCounts(plantingTotals);
+        long totalPlantings = plantingCounts.values().stream().mapToLong(Long::longValue).sum();
 
-        List<HarvestRecord> harvests = activeHarvests(farmId, email);
+        List<ExpenseRepo.CategoryTotal> expenseTotals =
+                expenseRepo.summarizeByFarm(farmId, email, null, null);
+        Map<ExpenseCategory, BigDecimal> expensesByCategory = expenseTotalsByCategory(expenseTotals);
+        BigDecimal totalExpenses = sumExpenseTotals(expenseTotals);
 
-        log.info("FarmSummaryService-getFarmSummary Executed for the FarmID={} \n Data={}"
-                ,farmId,new FarmSummaryResponse(farm.getId(), farm.getFarmName(),
-                fieldRepo.findAllByFarm_IdAndFarm_Owner_Email(farmId, email).size(),
-                plantings.size(), plantingCounts(plantings), sumExpenses(expenses),
-                expensesByCategory(expenses), harvestsByUnit(harvests), harvests.size()));
+        List<HarvestRecordRepo.UnitTotal> harvestTotals =
+                harvestRecordRepo.summarizeByFarm(farmId, email, null, null);
+        Map<HarvestUnit, BigDecimal> harvestsByUnit = harvestTotalsByUnit(harvestTotals);
+        long harvestRecordCount = harvestTotals.stream()
+                .mapToLong(total -> total.getRecordCount() == null ? 0L : total.getRecordCount())
+                .sum();
 
-        return new FarmSummaryResponse(farm.getId(), farm.getFarmName(),
-                fieldRepo.findAllByFarm_IdAndFarm_Owner_Email(farmId, email).size(),
-                plantings.size(), plantingCounts(plantings), sumExpenses(expenses),
-                expensesByCategory(expenses), harvestsByUnit(harvests), harvests.size());
+        FarmSummaryResponse response = new FarmSummaryResponse(
+                farm.getId(), farm.getFarmName(), totalFields, totalPlantings,
+                plantingCounts, totalExpenses, expensesByCategory, harvestsByUnit,
+                harvestRecordCount);
+
+        log.info("FarmSummaryService-getFarmSummary Executed for the FarmID={} Data={}",
+                farmId, response);
+        return response;
     }
 
     public ExpenseSummaryResponse getExpenseSummary(Long farmId,
@@ -64,24 +73,26 @@ public class FarmSummaryService {
         getOwnedFarm(farmId, email);
         validateDateRange(from, to);
 
-        List<Expense> expenses = activeExpenses(farmId, email)
-                .stream()
-                .filter(withinRange(Expense::getExpenseDate, from, to))
-                .toList();
+        List<ExpenseRepo.CategoryTotal> totals =
+                expenseRepo.summarizeByFarm(farmId, email, from, to);
+        Map<ExpenseCategory, BigDecimal> byCategory = expenseTotalsByCategory(totals);
+        long recordCount = totals.stream()
+                .mapToLong(total -> total.getRecordCount() == null ? 0L : total.getRecordCount())
+                .sum();
+        BigDecimal totalAmount = sumExpenseTotals(totals);
 
-        log.info("FarmSummaryService-getExpenseSummary Executed for the FarmID={} " +
-                "\n Expense_Data={}",farmId,new ExpenseSummaryResponse(
-                        farmId, from, to, (long) expenses.size(),
-                        sumExpenses(expenses), expensesByCategory(expenses)));
-
-        return ExpenseSummaryResponse.builder()
+        ExpenseSummaryResponse response = ExpenseSummaryResponse.builder()
                 .farmId(farmId)
                 .from(from)
                 .to(to)
-                .recordCount((long) expenses.size())
-                .totalAmount(sumExpenses(expenses))
-                .byCategory(expensesByCategory(expenses))
+                .recordCount(recordCount)
+                .totalAmount(totalAmount)
+                .byCategory(byCategory)
                 .build();
+
+        log.info("FarmSummaryService-getExpenseSummary Executed for the FarmID={} Expense_Data={}",
+                farmId, response);
+        return response;
     }
 
     public HarvestSummaryResponse getHarvestSummary(Long farmId,
@@ -91,88 +102,88 @@ public class FarmSummaryService {
         getOwnedFarm(farmId, email);
         validateDateRange(from, to);
 
-        List<HarvestRecord> harvests = activeHarvests(farmId, email)
-                .stream()
-                .filter(withinRange(HarvestRecord::getHarvestDate, from, to)).toList();
-        log.info("FarmSummaryService-getHarvestSummary Executed for the FarmID={} " +
-                "\n Harvest_Data={}",farmId,new HarvestSummaryResponse(farmId, from, to, harvests.size(), harvestsByUnit(harvests)));
+        List<HarvestRecordRepo.UnitTotal> totals =
+                harvestRecordRepo.summarizeByFarm(farmId, email, from, to);
+        Map<HarvestUnit, BigDecimal> quantityByUnit = harvestTotalsByUnit(totals);
+        long recordCount = totals.stream()
+                .mapToLong(total -> total.getRecordCount() == null ? 0L : total.getRecordCount())
+                .sum();
 
-        return new HarvestSummaryResponse(farmId, from, to, harvests.size(), harvestsByUnit(harvests));
+        HarvestSummaryResponse response =
+                new HarvestSummaryResponse(farmId, from, to, recordCount, quantityByUnit);
+
+        log.info("FarmSummaryService-getHarvestSummary Executed for the FarmID={} Harvest_Data={}",
+                farmId, response);
+        return response;
     }
 
     public PlantingSummaryResponse getPlantingSummary(Long farmId, String email) {
         getOwnedFarm(farmId, email);
-        List<CropPlanting> plantings = cropPlantingRepo.findAllByField_Farm_IdAndField_Farm_Owner_Email(farmId, email);
-        log.info("FarmSummaryService-getPlantingSummary Executed for the FarmID={} \n Planting_Data={}",farmId,new PlantingSummaryResponse(farmId, plantings.size(), plantingCounts(plantings)));
-        return new PlantingSummaryResponse(farmId, plantings.size(), plantingCounts(plantings));
+
+        Map<CropPlantingStatus, Long> counts =
+                plantingCounts(cropPlantingRepo.countByFarmGroupedByStatus(farmId, email));
+        long totalPlantings = counts.values().stream().mapToLong(Long::longValue).sum();
+
+        PlantingSummaryResponse response =
+                new PlantingSummaryResponse(farmId, totalPlantings, counts);
+        log.info("FarmSummaryService-getPlantingSummary Executed for the FarmID={} Planting_Data={}",
+                farmId, response);
+        return response;
     }
 
     private Farm getOwnedFarm(Long farmId, String email) {
-        log.info("FarmSummaryService-getOwnedFarm Executed for the FarmID={}",farmId);
         return farmRepo.findByIdAndOwner_Email(farmId, email)
                 .orElseThrow(() -> new FarmNotFoundException("Farm not found with ID: " + farmId));
     }
 
     private void validateDateRange(LocalDate from, LocalDate to) {
         if (from != null && to != null && from.isAfter(to)) {
-            log.error("FarmSummaryService-validateDateRange Failed 'from' date {} must be on or before 'to' date {}",from,to);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "'from' date must be on or before 'to' date");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "'from' date must be on or before 'to' date");
         }
-        log.info("FarmSummaryService-validateDateRange Executed!");
     }
 
-    private <T> Predicate<T> withinRange(Function<T, LocalDate> dateGetter, LocalDate from, LocalDate to) {
-        return item -> {
-            LocalDate date = dateGetter.apply(item);
-            return (from == null || !date.isBefore(from)) && (to == null || !date.isAfter(to));
-        };
-    }
-
-    private List<Expense> activeExpenses(Long farmId, String email) {
-        return expenseRepo
-                .findAllByFarm_IdAndFarm_Owner_EmailOrderByExpenseDateDescCreatedAtDesc(farmId, email)
-                .stream().filter(record -> !record.isVoided()).toList();
-    }
-
-    private List<HarvestRecord> activeHarvests(Long farmId, String email) {
-        return harvestRecordRepo
-                .findAllByCropPlanting_Field_Farm_IdAndCropPlanting_Field_Farm_Owner_EmailOrderByHarvestDateDescCreatedAtDesc(farmId, email)
-                .stream()
-                .filter(record -> !record.isVoided())
-                .toList();
-    }
-
-    private BigDecimal sumExpenses(List<Expense> records) {
-        return records.stream().map(Expense::getAmount).filter(value -> value != null).reduce(ZERO, BigDecimal::add);
-    }
-
-    private Map<ExpenseCategory, BigDecimal> expensesByCategory(List<Expense> records) {
-        Map<ExpenseCategory, BigDecimal> totals = new EnumMap<>(ExpenseCategory.class);
-        for (Expense record : records) {
-            if (record.getCategory() != null && record.getAmount() != null)
-                totals.merge(record.getCategory(), record.getAmount(), BigDecimal::add);
-        }
-        return totals;
-    }
-
-    private Map<HarvestUnit, BigDecimal> harvestsByUnit(List<HarvestRecord> records) {
-        Map<HarvestUnit, BigDecimal> totals = new EnumMap<>(HarvestUnit.class);
-        for (HarvestRecord record : records) {
-            if (record.getUnit() != null && record.getQuantity() != null)
-                totals.merge(record.getUnit(), record.getQuantity(), BigDecimal::add);
-        }
-        return totals;
-    }
-
-    private Map<CropPlantingStatus, Long> plantingCounts(List<CropPlanting> plantings) {
+    private Map<CropPlantingStatus, Long> plantingCounts(
+            List<CropPlantingRepo.StatusCount> totals) {
         Map<CropPlantingStatus, Long> counts = new EnumMap<>(CropPlantingStatus.class);
-        for (CropPlantingStatus status : CropPlantingStatus.values()) counts.put(status, 0L);
-        plantings.stream().collect(Collectors.groupingBy(CropPlanting::getStatus, Collectors.counting())).forEach(counts::put);
+        for (CropPlantingStatus status : CropPlantingStatus.values()) {
+            counts.put(status, 0L);
+        }
+        for (CropPlantingRepo.StatusCount total : totals) {
+            if (total.getStatus() != null && total.getTotal() != null) {
+                counts.put(total.getStatus(), total.getTotal());
+            }
+        }
         return counts;
     }
 
-    private List<CropPlanting> getCropPlantings(Long farmId, String email) {
-        return cropPlantingRepo
-                .findAllByField_Farm_IdAndField_Farm_Owner_Email(farmId, email);
+    private Map<ExpenseCategory, BigDecimal> expenseTotalsByCategory(
+            List<ExpenseRepo.CategoryTotal> totals) {
+        Map<ExpenseCategory, BigDecimal> result = new EnumMap<>(ExpenseCategory.class);
+        for (ExpenseRepo.CategoryTotal total : totals) {
+            if (total.getCategory() != null && total.getTotal() != null) {
+                result.put(total.getCategory(), total.getTotal());
+            }
+        }
+        return result;
+    }
+
+    private BigDecimal sumExpenseTotals(List<ExpenseRepo.CategoryTotal> totals) {
+        return totals.stream()
+                .map(ExpenseRepo.CategoryTotal::getTotal)
+                .filter(value -> value != null)
+                .reduce(ZERO, BigDecimal::add);
+    }
+
+    private Map<HarvestUnit, BigDecimal> harvestTotalsByUnit(
+            List<HarvestRecordRepo.UnitTotal> totals) {
+        Map<HarvestUnit, BigDecimal> result = new EnumMap<>(HarvestUnit.class);
+        for (HarvestRecordRepo.UnitTotal total : totals) {
+            if (total.getUnit() != null && total.getTotal() != null) {
+                result.put(total.getUnit(), total.getTotal());
+            }
+        }
+        return result;
     }
 }
