@@ -28,14 +28,14 @@ public interface HarvestRecordRepo extends JpaRepository<HarvestRecord, Long> {
         WHERE h.cropPlanting.field.farm.id = :farmId
           AND h.cropPlanting.field.farm.owner.email = :email
           AND h.voided = false
-          AND (:from IS NULL OR h.harvestDate >= :from)
-          AND (:to IS NULL OR h.harvestDate <= :to)
+          AND (:startDate IS NULL OR h.harvestDate >= :startDate)
+          AND (:endDate IS NULL OR h.harvestDate <= :endDate)
         GROUP BY h.unit
     """)
     List<UnitTotal> summarizeByFarm(@Param("farmId") Long farmId,
                                     @Param("email") String email,
-                                    @Param("from") LocalDate from,
-                                    @Param("to") LocalDate to);
+                                    @Param("startDate") LocalDate startDate,
+                                    @Param("endDate") LocalDate endDate);
 
     Optional<HarvestRecord> findByIdAndCropPlanting_Field_Farm_Owner_Email(Long id, String email);
 
