@@ -20,14 +20,24 @@ public interface CropPlantingRepo extends JpaRepository<CropPlanting, Long> {
     boolean existsByCropType_Id(Long cropTypeId);
     List<CropPlanting> findAllByField_Farm_Owner_Email(String email);
     List<CropPlanting> findAllByField_IdAndField_Farm_Owner_Email(Long fieldId, String email);
-    List<CropPlanting> findAllByField_Farm_IdAndField_Farm_Owner_Email(Long farmId, String email);
+
+    @Query("""
+        SELECT cp.status AS status, COUNT(cp) AS total
+        FROM CropPlanting cp
+        WHERE cp.field.farm.id = :farmId
+          AND cp.field.farm.owner.email = :email
+        GROUP BY cp.status
+    """)
+    List<StatusCount> countByFarmGroupedByStatus(@Param("farmId") Long farmId,
+                                                  @Param("email") String email);
+
     Optional<CropPlanting> findByIdAndField_Farm_Owner_Email(Long id, String email);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
-    SELECT p FROM CropPlanting p
-    WHERE p.id = :id
-      AND p.field.farm.owner.email = :email
+        SELECT p FROM CropPlanting p
+        WHERE p.id = :id
+          AND p.field.farm.owner.email = :email
     """)
     Optional<CropPlanting> findOwnedPlantingForUpdate(@Param("id") Long id, @Param("email") String email);
 
@@ -59,4 +69,9 @@ public interface CropPlantingRepo extends JpaRepository<CropPlanting, Long> {
             @Param("eventDate") LocalDate eventDate,
             @Param("plannedStatus") CropPlantingStatus plannedStatus,
             @Param("harvestStatuses") Collection<CropPlantingStatus> harvestStatuses);
+
+    interface StatusCount {
+        CropPlantingStatus getStatus();
+        Long getTotal();
+    }
 }
