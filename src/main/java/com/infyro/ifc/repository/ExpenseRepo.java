@@ -31,14 +31,14 @@ public interface ExpenseRepo extends JpaRepository<Expense, Long> {
         WHERE e.farm.id = :farmId
           AND e.farm.owner.email = :email
           AND e.voided = false
-          AND (:from IS NULL OR e.expenseDate >= :from)
-          AND (:to IS NULL OR e.expenseDate <= :to)
+          AND (:startDate IS NULL OR e.expenseDate >= :startDate)
+          AND (:endDate IS NULL OR e.expenseDate <= :endDate)
         GROUP BY e.category
     """)
     List<CategoryTotal> summarizeByFarm(@Param("farmId") Long farmId,
                                         @Param("email") String email,
-                                        @Param("from") LocalDate from,
-                                        @Param("to") LocalDate to);
+                                        @Param("startDate") LocalDate startDate,
+                                        @Param("endDate") LocalDate endDate);
 
     Optional<Expense> findByIdAndFarm_Owner_Email(Long id, String email);
 
