@@ -85,7 +85,7 @@ public class HarvestRecordService {
         log.info("HarvestRecordService-list Executed for the Planting_ID={}",plantingId);
 
         List<HarvestRecordResponse> response = harvestRecordRepo
-                .findAllByCropPlanting_IdAndCropPlanting_Field_Farm_Owner_EmailOrderByHarvestDateDescCreatedAtDesc(
+                .findByPlanting(
                         plantingId, email)
                             .stream()
                             .map(harvestRecordMapper::response)
