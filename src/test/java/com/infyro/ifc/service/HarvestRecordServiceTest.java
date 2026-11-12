@@ -85,7 +85,8 @@ class HarvestRecordServiceTest {
         });
 
         HarvestRecordResponse response = service.create(
-                4L, "owner@example.com", request(harvestDate));
+                4L, "owner@example.com", request(harvestDate)).getBody();
+        assertNotNull(response);
 
         assertEquals(55L, response.id());
         assertEquals(4L, response.cropPlantingId());
@@ -190,7 +191,8 @@ class HarvestRecordServiceTest {
         });
 
         HarvestRecordResponse response = service.create(
-                4L, "owner@example.com", request(earlyDate));
+                4L, "owner@example.com", request(earlyDate)).getBody();
+        assertNotNull(response);
 
         assertEquals(56L, response.id());
         verify(records).save(any(HarvestRecord.class));
