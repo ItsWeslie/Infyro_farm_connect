@@ -80,7 +80,7 @@ public class ExpenseService {
         }
 
         List<ExpenseResponse> expenseResponses = expenseRepo
-                .findAllByFarm_IdAndFarm_Owner_EmailOrderByExpenseDateDescCreatedAtDesc(farmId, email)
+                .findByFarm(farmId, email)
                 .stream()
                 .map(expenseMapper::response)
                 .toList();
