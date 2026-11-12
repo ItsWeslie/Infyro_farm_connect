@@ -1,5 +1,6 @@
 package com.infyro.ifc.controller.farm;
 
+import com.infyro.ifc.api.APIConstants;
 import com.infyro.ifc.dto.farm.*;
 import com.infyro.ifc.service.farm.FarmSummaryService;
 import lombok.RequiredArgsConstructor;
@@ -10,16 +11,17 @@ import java.time.LocalDate;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/farms/{farmId}")
+@RequestMapping(APIConstants.SUMMARY)
 public class FarmSummaryController {
+
     private final FarmSummaryService service;
 
-    @GetMapping("/summary")
+    @GetMapping(APIConstants.Summary.OVERALL_SUMMARY)
     public FarmSummaryResponse getSummary(@PathVariable Long farmId, Principal principal) {
         return service.getFarmSummary(farmId, principal.getName());
     }
 
-    @GetMapping("/expenses/summary")
+    @GetMapping(APIConstants.Summary.EXPENSE_SUMMARY)
     public ExpenseSummaryResponse getExpenseSummary(@PathVariable Long farmId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
@@ -27,7 +29,7 @@ public class FarmSummaryController {
         return service.getExpenseSummary(farmId, principal.getName(), from, to);
     }
 
-    @GetMapping("/harvests/summary")
+    @GetMapping(APIConstants.Summary.HARVEST_SUMMARY)
     public HarvestSummaryResponse getHarvestSummary(@PathVariable Long farmId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
@@ -35,7 +37,7 @@ public class FarmSummaryController {
         return service.getHarvestSummary(farmId, principal.getName(), from, to);
     }
 
-    @GetMapping("/plantings/summary")
+    @GetMapping(APIConstants.Summary.PLANTING_SUMMARY)
     public PlantingSummaryResponse getPlantingSummary(@PathVariable Long farmId, Principal principal) {
         return service.getPlantingSummary(farmId, principal.getName());
     }

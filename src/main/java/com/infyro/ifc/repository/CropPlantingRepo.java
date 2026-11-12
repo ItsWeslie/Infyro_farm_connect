@@ -16,6 +16,7 @@ import java.util.Optional;
 
 @Repository
 public interface CropPlantingRepo extends JpaRepository<CropPlanting, Long> {
+
     boolean existsByCropType_Id(Long cropTypeId);
     List<CropPlanting> findAllByField_Farm_Owner_Email(String email);
     List<CropPlanting> findAllByField_IdAndField_Farm_Owner_Email(Long fieldId, String email);

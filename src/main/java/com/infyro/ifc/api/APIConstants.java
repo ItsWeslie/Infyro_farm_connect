@@ -17,6 +17,7 @@ public final class APIConstants {
     public static final String CROP_ACTIVITY=BASE_URL+"/crop-activities";
     public static final String EXPENSE=BASE_URL+"/farms/{farmId}/expenses";
     public static final String HARVEST=BASE_URL+"/crop-plantings/{plantingId}/harvest-records";
+    public static final String SUMMARY =BASE_URL+"/farms/{farmId}";
 
     public static final class Auth {
         public static final String LOGIN="/login";
@@ -61,5 +62,10 @@ public final class APIConstants {
         public static final String DELETE="/{id}";
     }
 
-    public static final class Expense { }
+    public static final class Summary {
+        public static final String OVERALL_SUMMARY ="/summary";
+        public static final String EXPENSE_SUMMARY="/expenses/summary";
+        public static final String HARVEST_SUMMARY="/harvests/summary";
+        public static final String PLANTING_SUMMARY="/plantings/summary";
+    }
 }

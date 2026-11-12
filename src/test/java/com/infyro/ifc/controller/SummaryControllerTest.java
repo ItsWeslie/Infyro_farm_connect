@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
-class FarmSummaryControllerTest {
+class SummaryControllerTest {
 
     private FarmSummaryService service;
     private MockMvc mockMvc;
@@ -65,7 +65,7 @@ class FarmSummaryControllerTest {
         LocalDate from = LocalDate.of(2026, 10, 1);
         LocalDate to = LocalDate.of(2026, 10, 31);
         when(service.getExpenseSummary(7L, "owner@example.com", from, to)).thenReturn(
-                new ExpenseSummaryResponse(7L, from, to, 2, new BigDecimal("75.00"),
+                new ExpenseSummaryResponse(7L, from, to, 2L, new BigDecimal("75.00"),
                         Map.of(ExpenseCategory.LABOUR, new BigDecimal("75.00"))));
 
         mockMvc.perform(get("/api/farms/7/expenses/summary")
