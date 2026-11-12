@@ -32,20 +32,8 @@ class SummaryServiceTest {
     FarmSummaryService service;
 
     @Test
-    void farmSummaryExcludesVoidedRecordsAndGroupsHarvestsByUnit() {
+    void farmSummaryUsesAggregateQueriesAndGroupsHarvestsByUnit() {
         Farm farm = Farm.builder().id(5L).farmName("North Farm").build();
-        CropPlanting planned = CropPlanting.builder().id(10L).status(CropPlantingStatus.PLANNED).build();
-        CropPlanting active = CropPlanting.builder().id(11L).status(CropPlantingStatus.ACTIVE).build();
-        Expense validExpense = Expense.builder().amount(new BigDecimal("120.50"))
-                .category(ExpenseCategory.LABOUR).voided(false).build();
-        Expense voidedExpense = Expense.builder().amount(new BigDecimal("900.00"))
-                .category(ExpenseCategory.SEEDS_AND_SEEDLINGS).voided(true).build();
-        HarvestRecord kilo = HarvestRecord.builder().quantity(new BigDecimal("20.000"))
-                .unit(HarvestUnit.KILOGRAM).voided(false).build();
-        HarvestRecord tonne = HarvestRecord.builder().quantity(new BigDecimal("2.000"))
-                .unit(HarvestUnit.TONNE).voided(false).build();
-        HarvestRecord voidedHarvest = HarvestRecord.builder().quantity(new BigDecimal("999.000"))
-                .unit(HarvestUnit.KILOGRAM).voided(true).build();
 
         when(farmRepo.findByIdAndOwner_Email(5L, "owner@example.com")).thenReturn(Optional.of(farm));
         when(fieldRepo.countByFarm(5L, "owner@example.com")).thenReturn(1L);
