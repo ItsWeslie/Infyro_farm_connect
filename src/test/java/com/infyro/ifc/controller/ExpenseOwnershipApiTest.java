@@ -26,7 +26,7 @@ class ExpenseOwnershipApiTest {
 
     @Test
     void expenseNotOwnedByCallerReturnsStructured404() throws Exception {
-        when(service.getById(91L, "attacker@example.com"))
+        when(service.getExpenseByExpenseIdAndFarmId(91L, 10L, "attacker@example.com"))
                 .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Expense not found"));
 
         mockMvc.perform(get("/api/farms/10/expenses/91")
@@ -38,14 +38,15 @@ class ExpenseOwnershipApiTest {
                 .andExpect(jsonPath("$.code").value("NOT_FOUND"))
                 .andExpect(jsonPath("$.fieldErrors").isArray());
 
-        verify(service).getById(91L, "attacker@example.com");
+        verify(service).getExpenseByExpenseIdAndFarmId(91L, 10L, "attacker@example.com");
     }
 
     @Test
     void expenseFromDifferentFarmIsHiddenAs404() throws Exception {
         ExpenseResponse expense = mock(ExpenseResponse.class);
         when(expense.farmId()).thenReturn(20L);
-        when(service.getById(91L, "owner@example.com")).thenReturn(expense);
+        when(service.getExpenseByExpenseIdAndFarmId(91L, 10L, "owner@example.com"))
+                .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Expense not found"));
 
         mockMvc.perform(get("/api/farms/10/expenses/91")
                         .principal((Principal) () -> "owner@example.com")
@@ -54,6 +55,6 @@ class ExpenseOwnershipApiTest {
                 .andExpect(jsonPath("$.status").value(404))
                 .andExpect(jsonPath("$.code").value("NOT_FOUND"));
 
-        verify(service, never()).delete(anyLong(), anyString());
+        verify(service).getExpenseByExpenseIdAndFarmId(91L, 10L, "owner@example.com");
     }
 }
