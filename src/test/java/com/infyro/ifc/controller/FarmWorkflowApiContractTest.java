@@ -13,6 +13,8 @@ import com.infyro.ifc.service.farm.FarmSummaryService;
 import com.infyro.ifc.service.HarvestRecordService;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -38,6 +40,8 @@ class FarmWorkflowApiContractTest {
 
     @Test
     void expenseCreationUsesFarmRouteAndAuthenticatedOwner() throws Exception {
+        when(expenseService.createExpense(eq(12L), eq("owner@example.com"), any(ExpenseRequest.class)))
+                .thenReturn(ResponseEntity.status(HttpStatus.CREATED).body(mock(ExpenseResponse.class)));
         expenseMvc.perform(post("/api/farms/12/expenses")
                         .principal((Principal) () -> "owner@example.com")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -47,12 +51,14 @@ class FarmWorkflowApiContractTest {
                                 """))
                 .andExpect(status().isCreated());
 
-        verify(expenseService).create(eq(12L), eq("owner@example.com"), any(ExpenseRequest.class));
+        verify(expenseService).createExpense(eq(12L), eq("owner@example.com"), any(ExpenseRequest.class));
         verifyNoMoreInteractions(expenseService);
     }
 
     @Test
     void harvestCreationUsesPlantingRouteAndAuthenticatedOwner() throws Exception {
+        when(harvestService.create(eq(31L), eq("owner@example.com"), any(HarvestRecordRequest.class)))
+                .thenReturn(ResponseEntity.status(HttpStatus.CREATED).body(mock(HarvestRecordResponse.class)));
         harvestMvc.perform(post("/api/crop-plantings/31/harvest-records")
                         .principal((Principal) () -> "owner@example.com")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -67,27 +73,21 @@ class FarmWorkflowApiContractTest {
 
     @Test
     void cancellingExpenseReturnsNoContentAndUsesAuthenticatedOwner() throws Exception {
-        when(expenseService.getById(41L, "owner@example.com"))
-                .thenReturn(new ExpenseResponse(41L, 12L, null, null, null, null, null, null, null, false, "Active", null, null));
         expenseMvc.perform(delete("/api/farms/12/expenses/41")
                         .principal((Principal) () -> "owner@example.com"))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk());
 
-        verify(expenseService).getById(41L, "owner@example.com");
-        verify(expenseService).delete(41L, "owner@example.com");
+        verify(expenseService).deleteExpenseByIdAndFarmId(41L, 12L, "owner@example.com");
         verifyNoMoreInteractions(expenseService);
     }
 
     @Test
     void cancellingHarvestReturnsNoContentAndUsesAuthenticatedOwner() throws Exception {
-        when(harvestService.getById(51L, "owner@example.com"))
-                .thenReturn(new HarvestRecordResponse(51L, 31L, null, null, null, null, null, null, false, "Active", null, null));
         harvestMvc.perform(delete("/api/crop-plantings/31/harvest-records/51")
                         .principal((Principal) () -> "owner@example.com"))
                 .andExpect(status().isNoContent());
 
-        verify(harvestService).getById(51L, "owner@example.com");
-        verify(harvestService).delete(51L, "owner@example.com");
+        verify(harvestService).deleteByPlantingIdAndHarvestRecordId(51L, 31L, "owner@example.com");
         verifyNoMoreInteractions(harvestService);
     }
 
