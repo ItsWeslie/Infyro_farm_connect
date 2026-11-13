@@ -39,7 +39,7 @@ class ExpenseServiceTest {
         ExpenseRequest request = new ExpenseRequest(null, new BigDecimal("10.00"), LocalDate.now(),
                 ExpenseCategory.OTHER, "supplies");
         ResponseStatusException ex = assertThrows(ResponseStatusException.class,
-                () -> service.create(10L, "owner@example.com", request));
+                () -> service.createExpense(10L, "owner@example.com", request));
         assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
         verify(expenses, never()).save(any());
     }
@@ -55,7 +55,7 @@ class ExpenseServiceTest {
         ExpenseRequest request = new ExpenseRequest(3L, new BigDecimal("10.00"), LocalDate.now(),
                 ExpenseCategory.OTHER, "supplies");
         ResponseStatusException ex = assertThrows(ResponseStatusException.class,
-                () -> service.create(10L, "owner@example.com", request));
+                () -> service.createExpense(10L, "owner@example.com", request));
         assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
         verify(expenses, never()).save(any());
     }
@@ -66,7 +66,7 @@ class ExpenseServiceTest {
                 .thenReturn(Optional.empty());
 
         assertThrows(ResponseStatusException.class,
-                () -> service.getById(99L, "attacker@example.com"));
+                () -> service.getExpenseByExpenseIdAndFarmId(99L, 10L, "attacker@example.com"));
     }
 
     @Test
@@ -75,7 +75,7 @@ class ExpenseServiceTest {
                 .thenReturn(Optional.empty());
 
         assertThrows(ResponseStatusException.class,
-                () -> service.delete(99L, "attacker@example.com"));
+                () -> service.deleteExpenseByIdAndFarmId(99L, 10L, "attacker@example.com"));
 
         verify(expenses, never()).delete(any(Expense.class));
     }
@@ -86,10 +86,10 @@ class ExpenseServiceTest {
                 .thenReturn(Optional.empty());
 
         assertThrows(ResponseStatusException.class,
-                () -> service.listByFarm(10L, "attacker@example.com"));
+                () -> service.getAllExpensesByFarm(10L, "attacker@example.com"));
 
         verify(expenses, never())
-                .findAllByFarm_IdAndFarm_Owner_EmailOrderByExpenseDateDescCreatedAtDesc(
+                .findByFarm(
                         anyLong(), anyString());
     }
 
@@ -102,8 +102,9 @@ class ExpenseServiceTest {
             e.setId(99L);
             return e;
         });
-        ExpenseResponse response = service.create(10L, "owner@example.com",
-                new ExpenseRequest(null, new BigDecimal("12.50"), LocalDate.now(), ExpenseCategory.OTHER, "  tools  "));
+        ExpenseResponse response = service.createExpense(10L, "owner@example.com",
+                new ExpenseRequest(null, new BigDecimal("12.50"), LocalDate.now(), ExpenseCategory.OTHER, "  tools  ")).getBody();
+        assertNotNull(response);
         assertEquals(99L, response.id());
         assertEquals(10L, response.farmId());
         assertEquals("tools", response.description());
