@@ -11,6 +11,7 @@ import java.security.MessageDigest;
 
 @Component
 public class CsrfCookieValidator {
+
     private final TokenCookieService cookies;
     private final String allowedOrigin;
 

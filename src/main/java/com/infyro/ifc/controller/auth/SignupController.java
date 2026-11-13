@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping(APIConstants.AUTH)
 public class SignupController {
+
     private final SignupService signupService;
+
     @PostMapping(APIConstants.Auth.SIGNUP)
     public ResponseEntity<ApiResponse> signup(@Valid @RequestBody SignupRequest request,
                                               HttpServletRequest servletRequest) {

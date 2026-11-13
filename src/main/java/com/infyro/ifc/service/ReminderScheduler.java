@@ -18,6 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class ReminderScheduler {
+
     private static final LocalTime REMINDER_TIME = LocalTime.of(9, 0);
     private static final ZoneId APPLICATION_ZONE = ZoneId.of("Asia/Kolkata");
 
@@ -27,12 +28,15 @@ public class ReminderScheduler {
 
     @Scheduled(cron = "0 */5 * * * *", zone = "Asia/Kolkata")
     public void createDueReminders() {
+
         var now = java.time.ZonedDateTime.now(clock);
         if (now.toLocalTime().isBefore(REMINDER_TIME)) {
             log.warn("ReminderScheduler-createDueReminders Reminder-time not came!");
             return;
         }
+
         LocalDate eventDate = now.toLocalDate().plusDays(1);
+
         for (CalendarEventProvider provider : providers) {
             for (ReminderCandidate candidate : provider.findReminderCandidates(eventDate)) {
                 try {

@@ -17,6 +17,7 @@ import java.time.ZoneId;
 @RequiredArgsConstructor
 @Slf4j
 public class ReminderNotificationCreator {
+
     private static final LocalTime REMINDER_TIME = LocalTime.of(9, 0);
     private static final ZoneId APPLICATION_ZONE = ZoneId.of("Asia/Kolkata");
 
@@ -25,17 +26,23 @@ public class ReminderNotificationCreator {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void createIfAbsent(ReminderCandidate candidate) {
-        if (notificationRepository.existsByOwner_IdAndEventKey(candidate.ownerId(), candidate.eventKey())) {
+
+        if (notificationRepository
+                .existsByOwner_IdAndEventKey(candidate.ownerId(), candidate.eventKey())) {
             return;
         }
+
         var owner = userRepository.findById(candidate.ownerId()).orElse(null);
         if (owner == null) {
             log.warn("ReminderNotificationCreator-createIfAbsent Owner is null!");
             return;
         }
+
         var scheduledAt = candidate.eventDate().minusDays(1)
                 .atTime(REMINDER_TIME).atZone(APPLICATION_ZONE).toInstant();
+
         log.info("ReminderNotificationCreator-createIfAbsent Executed reminder saved!");
+
         notificationRepository.save(DashboardNotification.builder()
                 .owner(owner)
                 .eventKey(candidate.eventKey())

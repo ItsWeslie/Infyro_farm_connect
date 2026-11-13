@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -21,9 +22,6 @@ public interface ExpenseRepo extends JpaRepository<Expense, Long> {
     """)
     List<Expense> findByFarm(@Param("farmId") Long farmId,
                              @Param("email") String email);
-
-    List<Expense> findAllByCropPlanting_IdAndFarm_Owner_EmailOrderByExpenseDateDescCreatedAtDesc(
-            Long plantingId, String email);
 
     @Query("""
         SELECT e.category AS category, SUM(e.amount) AS total, COUNT(e) AS recordCount
@@ -47,7 +45,7 @@ public interface ExpenseRepo extends JpaRepository<Expense, Long> {
 
     interface CategoryTotal {
         ExpenseCategory getCategory();
-        java.math.BigDecimal getTotal();
+        BigDecimal getTotal();
         Long getRecordCount();
     }
 }

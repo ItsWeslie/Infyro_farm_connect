@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface RefreshTokenRepo extends JpaRepository<RefreshToken, Long> {
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select t from RefreshToken t join fetch t.user where t.tokenHash = :hash")
     Optional<RefreshToken> findForUpdateByTokenHash(@Param("hash") String hash);
@@ -23,6 +24,4 @@ public interface RefreshTokenRepo extends JpaRepository<RefreshToken, Long> {
     int revokeAllForUser(@Param("userId") Long userId, @Param("now") Instant now);
 
     boolean existsByFamilyIdAndRevokedAtIsNullAndExpiresAtAfter(String familyId, Instant now);
-
-    List<RefreshToken> findAllByFamilyId(String familyId);
 }

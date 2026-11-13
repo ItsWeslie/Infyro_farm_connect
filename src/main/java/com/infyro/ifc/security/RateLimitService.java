@@ -8,10 +8,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class RateLimitService {
+
     private record Window(long startedAt, int count) {}
     private final ConcurrentHashMap<String, Window> windows = new ConcurrentHashMap<>();
 
     public void check(String key, int limit, long seconds) {
+
         long now=Instant.now().getEpochSecond();
         Window current=windows.compute(key,(k,old)->old==null || now-old.startedAt()>=seconds
                 ? new Window(now,1) : new Window(old.startedAt(),old.count()+1));

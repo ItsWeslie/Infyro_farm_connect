@@ -35,23 +35,33 @@ public class FarmSummaryService {
     private final HarvestRecordRepo harvestRecordRepo;
 
     public FarmSummaryResponse getFarmSummary(Long farmId, String email) {
+
         Farm farm = getOwnedFarm(farmId, email);
 
         long totalFields = fieldRepo.countByFarm(farmId, email);
 
         List<CropPlantingRepo.StatusCount> plantingTotals =
                 cropPlantingRepo.countByFarmGroupedByStatus(farmId, email);
+
         Map<CropPlantingStatus, Long> plantingCounts = plantingCounts(plantingTotals);
-        long totalPlantings = plantingCounts.values().stream().mapToLong(Long::longValue).sum();
+
+        long totalPlantings = plantingCounts
+                .values()
+                .stream()
+                .mapToLong(Long::longValue)
+                .sum();
 
         List<ExpenseRepo.CategoryTotal> expenseTotals =
                 expenseRepo.summarizeByFarm(farmId, email, null, null);
+
         Map<ExpenseCategory, BigDecimal> expensesByCategory = expenseTotalsByCategory(expenseTotals);
         BigDecimal totalExpenses = sumExpenseTotals(expenseTotals);
 
         List<HarvestRecordRepo.UnitTotal> harvestTotals =
                 harvestRecordRepo.summarizeByFarm(farmId, email, null, null);
+
         Map<HarvestUnit, BigDecimal> harvestsByUnit = harvestTotalsByUnit(harvestTotals);
+
         long harvestRecordCount = harvestTotals.stream()
                 .mapToLong(total -> total.getRecordCount() == null ? 0L : total.getRecordCount())
                 .sum();
@@ -75,10 +85,13 @@ public class FarmSummaryService {
 
         List<ExpenseRepo.CategoryTotal> totals =
                 expenseRepo.summarizeByFarm(farmId, email, from, to);
+
         Map<ExpenseCategory, BigDecimal> byCategory = expenseTotalsByCategory(totals);
+
         long recordCount = totals.stream()
                 .mapToLong(total -> total.getRecordCount() == null ? 0L : total.getRecordCount())
                 .sum();
+
         BigDecimal totalAmount = sumExpenseTotals(totals);
 
         ExpenseSummaryResponse response = ExpenseSummaryResponse.builder()
@@ -92,6 +105,7 @@ public class FarmSummaryService {
 
         log.info("FarmSummaryService-getExpenseSummary Executed for the FarmID={} Expense_Data={}",
                 farmId, response);
+
         return response;
     }
 
@@ -99,12 +113,15 @@ public class FarmSummaryService {
                                                     String email,
                                                     LocalDate from,
                                                     LocalDate to) {
+
         getOwnedFarm(farmId, email);
         validateDateRange(from, to);
 
         List<HarvestRecordRepo.UnitTotal> totals =
                 harvestRecordRepo.summarizeByFarm(farmId, email, from, to);
+
         Map<HarvestUnit, BigDecimal> quantityByUnit = harvestTotalsByUnit(totals);
+
         long recordCount = totals.stream()
                 .mapToLong(total -> total.getRecordCount() == null ? 0L : total.getRecordCount())
                 .sum();
@@ -118,16 +135,24 @@ public class FarmSummaryService {
     }
 
     public PlantingSummaryResponse getPlantingSummary(Long farmId, String email) {
+
         getOwnedFarm(farmId, email);
 
         Map<CropPlantingStatus, Long> counts =
                 plantingCounts(cropPlantingRepo.countByFarmGroupedByStatus(farmId, email));
-        long totalPlantings = counts.values().stream().mapToLong(Long::longValue).sum();
+
+        long totalPlantings = counts
+                .values()
+                .stream()
+                .mapToLong(Long::longValue)
+                .sum();
 
         PlantingSummaryResponse response =
                 new PlantingSummaryResponse(farmId, totalPlantings, counts);
+
         log.info("FarmSummaryService-getPlantingSummary Executed for the FarmID={} Planting_Data={}",
                 farmId, response);
+
         return response;
     }
 
@@ -146,21 +171,27 @@ public class FarmSummaryService {
 
     private Map<CropPlantingStatus, Long> plantingCounts(
             List<CropPlantingRepo.StatusCount> totals) {
+
         Map<CropPlantingStatus, Long> counts = new EnumMap<>(CropPlantingStatus.class);
+
         for (CropPlantingStatus status : CropPlantingStatus.values()) {
             counts.put(status, 0L);
         }
+
         for (CropPlantingRepo.StatusCount total : totals) {
             if (total.getStatus() != null && total.getTotal() != null) {
                 counts.put(total.getStatus(), total.getTotal());
             }
         }
+
         return counts;
     }
 
     private Map<ExpenseCategory, BigDecimal> expenseTotalsByCategory(
             List<ExpenseRepo.CategoryTotal> totals) {
+
         Map<ExpenseCategory, BigDecimal> result = new EnumMap<>(ExpenseCategory.class);
+
         for (ExpenseRepo.CategoryTotal total : totals) {
             if (total.getCategory() != null && total.getTotal() != null) {
                 result.put(total.getCategory(), total.getTotal());

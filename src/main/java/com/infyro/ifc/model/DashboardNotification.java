@@ -9,11 +9,11 @@ import java.time.Instant;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "dashboard_notifications", uniqueConstraints = @UniqueConstraint(
+@Table(name = "dashboard_notifications",
+        uniqueConstraints = @UniqueConstraint(
         name = "uk_notification_owner_event", columnNames = {"owner_id", "event_key"}))
 @Getter
 @Setter
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

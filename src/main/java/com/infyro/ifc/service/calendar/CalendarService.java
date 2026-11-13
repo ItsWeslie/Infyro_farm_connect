@@ -32,7 +32,9 @@ public class CalendarService {
         }
         log.info("CalenderService-getEvents Executed Successfully!");
         return providers.stream()
-                .flatMap(provider -> provider.findEvents(ownerEmail, from, to).stream())
+                .flatMap(provider -> provider
+                        .findEvents(ownerEmail, from, to)
+                        .stream())
                 .sorted(Comparator.comparing(CalendarEventResponse::eventDate)
                         .thenComparing(CalendarEventResponse::eventKey))
                 .toList();

@@ -20,7 +20,10 @@ public class JWTFilter extends OncePerRequestFilter {
     private final ApplicationContext context;
     private final RefreshTokenService sessions;
 
-    public JWTFilter(JWTService jwtService, ApplicationContext context, RefreshTokenService sessions) {
+    public JWTFilter(JWTService jwtService,
+                     ApplicationContext context,
+                     RefreshTokenService sessions) {
+
         this.jwtService = jwtService;
         this.context = context;
         this.sessions = sessions;
@@ -29,11 +32,13 @@ public class JWTFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain chain) throws ServletException, IOException {
+
         String header = request.getHeader("Authorization");
         if (header != null && header.startsWith("Bearer ")
                 && SecurityContextHolder.getContext().getAuthentication() == null) {
             authenticate(header.substring(7), request);
         }
+
         chain.doFilter(request, response);
     }
 
@@ -41,15 +46,19 @@ public class JWTFilter extends OncePerRequestFilter {
         try {
             String username = jwtService.extractUsername(token);
             String family = jwtService.extractSessionId(token);
+
             if (username == null || username.isBlank() || !sessions.isFamilyActive(family)) {
                 SecurityContextHolder.clearContext();
                 return;
             }
+
             UserDetails details = context.getBean(UsersDetailService.class).loadUserByUsername(username);
             if (jwtService.validateToken(token, details)) {
+
                 var auth = new UsernamePasswordAuthenticationToken(details, null, details.getAuthorities());
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(auth);
+
             }
         } catch (RuntimeException e) {
             log.debug("Ignoring invalid, expired, revoked, or unknown-user access token");

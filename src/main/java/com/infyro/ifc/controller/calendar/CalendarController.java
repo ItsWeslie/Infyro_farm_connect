@@ -1,5 +1,6 @@
 package com.infyro.ifc.controller.calendar;
 
+import com.infyro.ifc.api.APIConstants;
 import com.infyro.ifc.dto.calendar.CalendarEventResponse;
 import com.infyro.ifc.service.calendar.CalendarService;
 import lombok.RequiredArgsConstructor;
@@ -11,12 +12,12 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/calendar")
+@RequestMapping(APIConstants.CALENDAR)
 @RequiredArgsConstructor
 public class CalendarController {
     private final CalendarService calendarService;
 
-    @GetMapping("/events")
+    @GetMapping(APIConstants.Calendar.EVENTS)
     public List<CalendarEventResponse> getEvents(
             Principal principal,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,

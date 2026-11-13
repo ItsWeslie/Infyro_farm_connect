@@ -11,8 +11,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-@RestController @RequiredArgsConstructor @RequestMapping(APIConstants.AUTH)
+@RestController
+@RequiredArgsConstructor
+@RequestMapping(APIConstants.AUTH)
 public class LogoutController {
+
     private final RefreshTokenService refreshTokens;
     private final CsrfCookieValidator csrf;
     private final TokenCookieService cookies;

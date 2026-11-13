@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(APIConstants.AUTH)
 public class TokenValidateController {
+
     @GetMapping(APIConstants.Auth.VALIDATE)
     public ResponseEntity<LoginResponse> validate(@AuthenticationPrincipal UserPrincipal principal) {
         return ResponseEntity.ok(new LoginResponse(principal.getUser().getUsername(), UserType.USER,

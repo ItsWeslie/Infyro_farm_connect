@@ -1,5 +1,7 @@
 package com.infyro.ifc.security;
 
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.config.Customizer;
 import tools.jackson.databind.ObjectMapper;
 import com.infyro.ifc.api.APIConstants;
 import com.infyro.ifc.dto.api.ApiErrorResponse;
@@ -30,20 +32,29 @@ import java.util.List;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+
     private final UserDetailsService userDetailsService;
+
     @Value("${app.cors.allowed-origin:http://localhost:5173}")
     private String frontendOrigin;
 
-    @Bean public PasswordEncoder passwordEncoder() { return new BCryptPasswordEncoder(12); }
-    @Bean public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+    @Bean
+    public PasswordEncoder passwordEncoder() { return new BCryptPasswordEncoder(12); }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) {
         return config.getAuthenticationManager();
     }
-    @Bean public AuthenticationProvider authenticationProvider() {
+
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
     }
-    @Bean public CorsConfigurationSource corsConfigurationSource() {
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
         config.setAllowedOrigins(List.of(frontendOrigin));
@@ -54,25 +65,43 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**",config);
         return source;
     }
-    @Bean public AuthenticationEntryPoint apiAuthenticationEntryPoint(ObjectMapper mapper) {
-        return (request,response,exception) -> writeError(mapper,response,401,"UNAUTHORIZED",
+
+    @Bean
+    public AuthenticationEntryPoint apiAuthenticationEntryPoint(ObjectMapper mapper) {
+        return (request,
+                response,
+                exception) -> writeError(mapper,response,401,"UNAUTHORIZED",
                 "Authentication is required");
     }
-    @Bean public AccessDeniedHandler apiAccessDeniedHandler(ObjectMapper mapper) {
-        return (request,response,exception) -> writeError(mapper,response,403,"FORBIDDEN",
+
+    @Bean
+    public AccessDeniedHandler apiAccessDeniedHandler(ObjectMapper mapper) {
+        return (request,
+                response,
+                exception) -> writeError(mapper,response,403,"FORBIDDEN",
                 "You do not have permission to access this resource");
     }
-    private void writeError(ObjectMapper mapper,jakarta.servlet.http.HttpServletResponse response,
-                            int status,String code,String message)throws IOException {
-        response.setStatus(status); response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+
+    private void writeError(ObjectMapper mapper, HttpServletResponse response,
+                            int status, String code, String message) throws IOException
+    {
+        response.setStatus(status);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         mapper.writeValue(response.getOutputStream(),new ApiErrorResponse(status,code,message,List.of()));
     }
-    @Bean public SecurityFilterChain securityFilterChain(HttpSecurity http, JWTFilter jwtFilter,
-            AuthenticationEntryPoint entryPoint, AccessDeniedHandler deniedHandler)throws Exception {
+
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JWTFilter jwtFilter,
+            AuthenticationEntryPoint entryPoint, AccessDeniedHandler deniedHandler) {
+
         return http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 // Cookie-authenticated refresh/logout routes enforce explicit double-submit CSRF validation.
                 .csrf(AbstractHttpConfigurer::disable)
-                .exceptionHandling(e -> e.authenticationEntryPoint(entryPoint).accessDeniedHandler(deniedHandler))
+
+                .exceptionHandling(e -> e.authenticationEntryPoint(entryPoint)
+                        .accessDeniedHandler(deniedHandler))
+
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS,"/**").permitAll()
                         .requestMatchers(APIConstants.AUTH + APIConstants.Auth.LOGIN,
@@ -81,12 +110,17 @@ public class SecurityConfig {
                                 APIConstants.AUTH + APIConstants.Auth.LOGOUT).permitAll()
                         .requestMatchers(APIConstants.USER + "/**").hasRole("USER")
                         .anyRequest().authenticated())
+
                 .headers(headers -> headers
                         .frameOptions(frame -> frame.deny())
-                        .contentTypeOptions(org.springframework.security.config.Customizer.withDefaults())
-                        .httpStrictTransportSecurity(hsts -> hsts.includeSubDomains(true).maxAgeInSeconds(31536000)))
+                        .contentTypeOptions(Customizer.withDefaults())
+                        .httpStrictTransportSecurity(hsts -> hsts
+                                        .includeSubDomains(true)
+                                        .maxAgeInSeconds(31536000)))
+
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .build();
     }
 }
