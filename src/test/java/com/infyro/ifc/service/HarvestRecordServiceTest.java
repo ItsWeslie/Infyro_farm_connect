@@ -99,7 +99,7 @@ class HarvestRecordServiceTest {
                 55L, "attacker@example.com")).thenReturn(Optional.empty());
 
         assertThrows(ResponseStatusException.class,
-                () -> service.getById(55L, "attacker@example.com"));
+                () -> service.getByPlantingIdAndHarvestRecordId(55L, 4L, "attacker@example.com"));
     }
 
     @Test
@@ -108,7 +108,7 @@ class HarvestRecordServiceTest {
                 55L, "attacker@example.com")).thenReturn(Optional.empty());
 
         assertThrows(ResponseStatusException.class,
-                () -> service.delete(55L, "attacker@example.com"));
+                () -> service.deleteByPlantingIdAndHarvestRecordId(55L, 4L, "attacker@example.com"));
 
         verify(records, never()).delete(any(HarvestRecord.class));
     }
@@ -119,10 +119,10 @@ class HarvestRecordServiceTest {
                 4L, "attacker@example.com")).thenReturn(Optional.empty());
 
         assertThrows(ResponseStatusException.class,
-                () -> service.list(4L, "attacker@example.com"));
+                () -> service.getAllHarvestRecordsByPlantingId(4L, "attacker@example.com"));
 
         verify(records, never())
-                .findAllByCropPlanting_IdAndCropPlanting_Field_Farm_Owner_EmailOrderByHarvestDateDescCreatedAtDesc(
+                .findByPlanting(
                         anyLong(), anyString());
     }
 
