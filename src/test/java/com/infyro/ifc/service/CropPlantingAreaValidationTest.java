@@ -7,7 +7,7 @@ import com.infyro.ifc.model.CropType;
 import com.infyro.ifc.model.Farm;
 import com.infyro.ifc.model.Field;
 import com.infyro.ifc.repository.CropPlantingRepo;
-import com.infyro.ifc.repository.CropTypeRepository;
+import com.infyro.ifc.repository.CropTypeRepo;
 import com.infyro.ifc.repository.FieldRepo;
 import com.infyro.ifc.enums.CropPlantingStatus;
 import com.infyro.ifc.service.crop.CropPlantingService;
@@ -31,7 +31,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class CropPlantingAreaValidationTest {
     @Mock CropPlantingRepo plantingRepository;
-    @Mock CropTypeRepository cropTypeRepository;
+    @Mock
+    CropTypeRepo cropTypeRepo;
     @Mock FieldRepo fieldRepo;
     @Mock CropPlantingMapper mapper;
     @InjectMocks
@@ -43,7 +44,7 @@ class CropPlantingAreaValidationTest {
         field.getCrops().add(CropPlanting.builder().id(12L).field(field).cropArea(new BigDecimal("3.00")).plantedOn(LocalDate.of(2026, 1, 1)).maturityTimeInDays(40).status(CropPlantingStatus.PLANNED).build());
         CropType type = CropType.builder().id(4L).farm(farm).defaultMaturityTimeInDays(40).build();
         when(fieldRepo.findOwnedFieldForUpdate(9L, "owner@example.com")).thenReturn(Optional.of(field));
-        when(cropTypeRepository.findByIdAndFarm_IdAndFarm_Owner_Email(4L, 7L, "owner@example.com")).thenReturn(Optional.of(type));
+        when(cropTypeRepo.findByIdAndFarm_IdAndFarm_Owner_Email(4L, 7L, "owner@example.com")).thenReturn(Optional.of(type));
         CropPlantingRequest request = new CropPlantingRequest(4L, new BigDecimal("8.00"), LocalDate.of(2026, 2, 1), null, 40);
 
         ResponseStatusException error = assertThrows(ResponseStatusException.class,

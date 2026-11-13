@@ -3,15 +3,13 @@ package com.infyro.ifc.service.farm;
 import com.infyro.ifc.dto.api.ApiResponse;
 import com.infyro.ifc.dto.farm.FarmRequest;
 import com.infyro.ifc.dto.farm.FarmResponse;
+import com.infyro.ifc.exception.ConflictException;
 import com.infyro.ifc.exception.FarmNotFoundException;
 import com.infyro.ifc.exception.UserNotFoundException;
 import com.infyro.ifc.mapper.FarmMapper;
 import com.infyro.ifc.model.Farm;
 import com.infyro.ifc.model.User;
-import com.infyro.ifc.repository.ExpenseRepo;
-import com.infyro.ifc.repository.FarmRepo;
-import com.infyro.ifc.repository.HarvestRecordRepo;
-import com.infyro.ifc.repository.UserRepo;
+import com.infyro.ifc.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -32,6 +30,7 @@ public class FarmService {
     private final FarmMapper farmMapper;
     private final ExpenseRepo expenseRepo;
     private final HarvestRecordRepo harvestRecordRepo;
+    private final CropTypeRepo cropTypeRepo;
 
     @Transactional
     public ResponseEntity<FarmResponse> createNewFarm(FarmRequest req, String email) {
@@ -66,7 +65,9 @@ public class FarmService {
 
     @Transactional
     public ResponseEntity<ApiResponse> deleteFarm(Long id, String email) {
+
         boolean exists = farmRepo.existsByIdAndOwner_Email(id, email);
+
         if (!exists) {
             throw new FarmNotFoundException("Farm not found with given id: " + id);
         }
@@ -75,6 +76,11 @@ public class FarmService {
                 || harvestRecordRepo.existsByCropPlanting_Field_Farm_Id(id)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "Farm cannot be deleted while expense or harvest history exists");
+        }
+
+        if (cropTypeRepo.existsByFarmId(id)) {
+            throw new ConflictException(
+                    "Cannot delete farm. Please delete its crop types first.");
         }
 
         farmRepo.deleteByIdAndOwner_Email(id, email);

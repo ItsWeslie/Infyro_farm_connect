@@ -6,7 +6,7 @@ import com.infyro.ifc.enums.ActivityStatus;
 import com.infyro.ifc.mapper.CropActivityLogMapper;
 import com.infyro.ifc.model.CropActivityLog;
 import com.infyro.ifc.model.CropPlanting;
-import com.infyro.ifc.repository.CropActivityLogRepository;
+import com.infyro.ifc.repository.CropActivityLogRepo;
 import com.infyro.ifc.repository.CropPlantingRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +23,7 @@ import java.util.List;
 @Slf4j
 public class CropActivityLogService {
 
-    private final CropActivityLogRepository activityRepository;
+    private final CropActivityLogRepo activityRepository;
     private final CropPlantingRepo plantingRepository;
     private final CropActivityLogMapper mapper;
 

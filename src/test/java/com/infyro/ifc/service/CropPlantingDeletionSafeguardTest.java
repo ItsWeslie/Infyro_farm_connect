@@ -2,9 +2,9 @@ package com.infyro.ifc.service;
 
 import com.infyro.ifc.enums.CropPlantingStatus;
 import com.infyro.ifc.model.CropPlanting;
-import com.infyro.ifc.repository.CropActivityLogRepository;
+import com.infyro.ifc.repository.CropActivityLogRepo;
 import com.infyro.ifc.repository.CropPlantingRepo;
-import com.infyro.ifc.repository.CropTypeRepository;
+import com.infyro.ifc.repository.CropTypeRepo;
 import com.infyro.ifc.repository.ExpenseRepo;
 import com.infyro.ifc.repository.FieldRepo;
 import com.infyro.ifc.repository.HarvestRecordRepo;
@@ -32,12 +32,12 @@ class CropPlantingDeletionSafeguardTest {
     private static final String OWNER = "owner@example.com";
 
     @Mock private CropPlantingRepo plantingRepository;
-    @Mock private CropTypeRepository cropTypeRepository;
+    @Mock private CropTypeRepo cropTypeRepo;
     @Mock private FieldRepo fieldRepo;
     @Mock private CropPlantingMapper cropPlantingMapper;
     @Mock private ExpenseRepo expenseRepo;
     @Mock private HarvestRecordRepo harvestRecordRepo;
-    @Mock private CropActivityLogRepository activityLogRepository;
+    @Mock private CropActivityLogRepo activityLogRepository;
 
     @InjectMocks private CropPlantingService service;
 

@@ -5,10 +5,10 @@ import com.infyro.ifc.mapper.CropPlantingMapper;
 import com.infyro.ifc.model.CropPlanting;
 import com.infyro.ifc.model.Field;
 import com.infyro.ifc.repository.CropPlantingRepo;
-import com.infyro.ifc.repository.CropActivityLogRepository;
+import com.infyro.ifc.repository.CropActivityLogRepo;
 import com.infyro.ifc.repository.ExpenseRepo;
 import com.infyro.ifc.repository.HarvestRecordRepo;
-import com.infyro.ifc.repository.CropTypeRepository;
+import com.infyro.ifc.repository.CropTypeRepo;
 import com.infyro.ifc.repository.FieldRepo;
 import com.infyro.ifc.service.crop.CropPlantingService;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,7 +37,7 @@ class CropPlantingServiceTest {
     private CropPlantingRepo plantingRepository;
 
     @Mock
-    private CropTypeRepository cropTypeRepository;
+    private CropTypeRepo cropTypeRepo;
 
     @Mock
     private FieldRepo fieldRepo;
@@ -47,7 +47,7 @@ class CropPlantingServiceTest {
 
     @Mock private ExpenseRepo expenseRepo;
     @Mock private HarvestRecordRepo harvestRecordRepo;
-    @Mock private CropActivityLogRepository activityLogRepository;
+    @Mock private CropActivityLogRepo activityLogRepository;
 
     @InjectMocks
     private CropPlantingService service;

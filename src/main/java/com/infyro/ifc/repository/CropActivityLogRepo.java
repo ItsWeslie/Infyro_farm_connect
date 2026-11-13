@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface CropActivityLogRepository extends JpaRepository<CropActivityLog, Long> {
+public interface CropActivityLogRepo extends JpaRepository<CropActivityLog, Long> {
 
     List<CropActivityLog>
     findAllByCropPlanting_IdAndCropPlanting_Field_Farm_Owner_EmailOrderByDayNumberAscCreatedAtAsc(

@@ -8,9 +8,9 @@ import com.infyro.ifc.mapper.CropPlantingMapper;
 import com.infyro.ifc.model.CropPlanting;
 import com.infyro.ifc.model.CropType;
 import com.infyro.ifc.model.Field;
-import com.infyro.ifc.repository.CropActivityLogRepository;
+import com.infyro.ifc.repository.CropActivityLogRepo;
 import com.infyro.ifc.repository.CropPlantingRepo;
-import com.infyro.ifc.repository.CropTypeRepository;
+import com.infyro.ifc.repository.CropTypeRepo;
 import com.infyro.ifc.repository.ExpenseRepo;
 import com.infyro.ifc.repository.FieldRepo;
 import com.infyro.ifc.repository.HarvestRecordRepo;
@@ -32,12 +32,12 @@ import java.util.List;
 public class CropPlantingService {
 
     private final CropPlantingRepo plantingRepository;
-    private final CropTypeRepository cropTypeRepository;
+    private final CropTypeRepo cropTypeRepo;
     private final FieldRepo fieldRepo;
     private final CropPlantingMapper cropPlantingMapper;
     private final ExpenseRepo expenseRepo;
     private final HarvestRecordRepo harvestRecordRepo;
-    private final CropActivityLogRepository activityLogRepository;
+    private final CropActivityLogRepo activityLogRepository;
 
     @Transactional
     public ResponseEntity<CropPlantingResponse> create(Long fieldId, String email,
@@ -238,7 +238,7 @@ public class CropPlantingService {
 
     private CropType getCropType(Field field, Long cropTypeId, String email) {
         log.info("CropPlantingService-getCropType Executed!");
-        return cropTypeRepository.findByIdAndFarm_IdAndFarm_Owner_Email(cropTypeId, field.getFarm().getId(), email)
+        return cropTypeRepo.findByIdAndFarm_IdAndFarm_Owner_Email(cropTypeId, field.getFarm().getId(), email)
                 .orElseThrow(() -> notFound("Crop type not found in this farm"));
     }
 

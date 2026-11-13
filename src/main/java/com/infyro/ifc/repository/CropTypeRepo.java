@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface CropTypeRepository extends JpaRepository<CropType, Long> {
+public interface CropTypeRepo extends JpaRepository<CropType, Long> {
 
     List<CropType> findAllByFarm_IdAndFarm_Owner_Email(Long farmId, String ownerEmail);
 
@@ -25,4 +25,6 @@ public interface CropTypeRepository extends JpaRepository<CropType, Long> {
 
     boolean existsByFarm_IdAndNameIgnoreCaseAndIdNot(
             Long farmId, String name, Long id);
+
+    boolean existsByFarmId(Long id);
 }

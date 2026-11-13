@@ -2,7 +2,7 @@ package com.infyro.ifc.service;
 
 import com.infyro.ifc.dto.notification.DashboardNotificationResponse;
 import com.infyro.ifc.model.DashboardNotification;
-import com.infyro.ifc.repository.DashboardNotificationRepository;
+import com.infyro.ifc.repository.DashboardNotificationRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -18,7 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class DashboardNotificationService {
-    private final DashboardNotificationRepository repository;
+    private final DashboardNotificationRepo repository;
 
     @Transactional(readOnly = true)
     public List<DashboardNotificationResponse> list(String email, boolean unreadOnly, int page, int size) {

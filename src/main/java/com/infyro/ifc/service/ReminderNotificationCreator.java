@@ -2,7 +2,7 @@ package com.infyro.ifc.service;
 
 import com.infyro.ifc.dto.calendar.ReminderCandidate;
 import com.infyro.ifc.model.DashboardNotification;
-import com.infyro.ifc.repository.DashboardNotificationRepository;
+import com.infyro.ifc.repository.DashboardNotificationRepo;
 import com.infyro.ifc.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +21,7 @@ public class ReminderNotificationCreator {
     private static final LocalTime REMINDER_TIME = LocalTime.of(9, 0);
     private static final ZoneId APPLICATION_ZONE = ZoneId.of("Asia/Kolkata");
 
-    private final DashboardNotificationRepository notificationRepository;
+    private final DashboardNotificationRepo notificationRepository;
     private final UserRepo userRepository;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
