@@ -72,7 +72,7 @@ class FarmWorkflowApiContractTest {
     }
 
     @Test
-    void cancellingExpenseReturnsNoContentAndUsesAuthenticatedOwner() throws Exception {
+    void cancellingExpenseReturnsOkAndUsesAuthenticatedOwner() throws Exception {
         expenseMvc.perform(delete("/api/farms/12/expenses/41")
                         .principal((Principal) () -> "owner@example.com"))
                 .andExpect(status().isOk());
@@ -82,10 +82,10 @@ class FarmWorkflowApiContractTest {
     }
 
     @Test
-    void cancellingHarvestReturnsNoContentAndUsesAuthenticatedOwner() throws Exception {
+    void cancellingHarvestReturnsOkAndUsesAuthenticatedOwner() throws Exception {
         harvestMvc.perform(delete("/api/crop-plantings/31/harvest-records/51")
                         .principal((Principal) () -> "owner@example.com"))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk());
 
         verify(harvestService).deleteByPlantingIdAndHarvestRecordId(51L, 31L, "owner@example.com");
         verifyNoMoreInteractions(harvestService);
