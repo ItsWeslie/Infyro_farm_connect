@@ -94,14 +94,15 @@ public class FarmSummaryService {
 
         BigDecimal totalAmount = sumExpenseTotals(totals);
 
-        ExpenseSummaryResponse response = ExpenseSummaryResponse.builder()
-                .farmId(farmId)
-                .from(from)
-                .to(to)
-                .recordCount(recordCount)
-                .totalAmount(totalAmount)
-                .byCategory(byCategory)
-                .build();
+        ExpenseSummaryResponse response = new ExpenseSummaryResponse(
+                farmId,
+                from,
+                to,
+                recordCount,
+                totalAmount,
+                byCategory
+        );
+
 
         log.info("FarmSummaryService-getExpenseSummary Executed for the FarmID={} Expense_Data={}",
                 farmId, response);
