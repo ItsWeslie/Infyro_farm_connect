@@ -55,7 +55,7 @@ class ExpenseHarvestEdgeCaseTest {
                 LocalDate.now(), ExpenseCategory.FERTILIZER, "Fertilizer");
 
         ResponseStatusException ex = assertThrows(ResponseStatusException.class,
-                () -> expenseService.create(1L, OWNER, request));
+                () -> expenseService.createExpense(1L, OWNER, request));
 
         assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
         verify(expenses, never()).save(any(Expense.class));
@@ -74,7 +74,7 @@ class ExpenseHarvestEdgeCaseTest {
                 LocalDate.now(), ExpenseCategory.FERTILIZER, "Fertilizer");
 
         ResponseStatusException ex = assertThrows(ResponseStatusException.class,
-                () -> expenseService.create(1L, OWNER, request));
+                () -> expenseService.createExpense(1L, OWNER, request));
 
         assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
         verify(expenses, never()).save(any(Expense.class));
@@ -90,10 +90,10 @@ class ExpenseHarvestEdgeCaseTest {
                 .expenseDate(LocalDate.now().minusDays(1)).category(ExpenseCategory.SEEDS_AND_SEEDLINGS)
                 .description("Cancelled").voided(true).build();
         when(farms.findByIdAndOwner_Email(1L, OWNER)).thenReturn(Optional.of(farm));
-        when(expenses.findAllByFarm_IdAndFarm_Owner_EmailOrderByExpenseDateDescCreatedAtDesc(1L, OWNER))
+        when(expenses.findByFarm(1L, OWNER))
                 .thenReturn(List.of(active, cancelled));
 
-        var result = expenseService.listByFarm(1L, OWNER);
+        var result = expenseService.getAllExpensesByFarm(1L, OWNER).getBody();
 
         assertEquals(2, result.size());
         assertFalse(result.get(0).voided());
@@ -112,10 +112,10 @@ class ExpenseHarvestEdgeCaseTest {
                 .harvestDate(LocalDate.now().minusDays(1)).quantity(new BigDecimal("2.000"))
                 .unit(HarvestUnit.KILOGRAM).voided(true).build();
         when(plantings.findByIdAndField_Farm_Owner_Email(3L, OWNER)).thenReturn(Optional.of(planting));
-        when(harvestRecords.findAllByCropPlanting_IdAndCropPlanting_Field_Farm_Owner_EmailOrderByHarvestDateDescCreatedAtDesc(3L, OWNER))
+        when(harvestRecords.findByPlanting(3L, OWNER))
                 .thenReturn(List.of(active, cancelled));
 
-        var result = harvestService.list(3L, OWNER);
+        var result = harvestService.getAllHarvestRecordsByPlantingId(3L, OWNER).getBody();
 
         assertEquals(2, result.size());
         assertFalse(result.get(0).voided());

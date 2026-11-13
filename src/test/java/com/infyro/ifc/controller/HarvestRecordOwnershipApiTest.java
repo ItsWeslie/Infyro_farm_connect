@@ -26,7 +26,7 @@ class HarvestRecordOwnershipApiTest {
 
     @Test
     void harvestNotOwnedByCallerReturnsStructured404() throws Exception {
-        when(service.getById(91L, "attacker@example.com"))
+        when(service.getByPlantingIdAndHarvestRecordId(91L, 4L, "attacker@example.com"))
                 .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Harvest record not found"));
 
         mockMvc.perform(get("/api/crop-plantings/4/harvest-records/91")
@@ -38,14 +38,15 @@ class HarvestRecordOwnershipApiTest {
                 .andExpect(jsonPath("$.code").value("NOT_FOUND"))
                 .andExpect(jsonPath("$.fieldErrors").isArray());
 
-        verify(service).getById(91L, "attacker@example.com");
+        verify(service).getByPlantingIdAndHarvestRecordId(91L, 4L, "attacker@example.com");
     }
 
     @Test
     void harvestFromDifferentPlantingIsHiddenAs404() throws Exception {
         HarvestRecordResponse record = mock(HarvestRecordResponse.class);
         when(record.cropPlantingId()).thenReturn(20L);
-        when(service.getById(91L, "owner@example.com")).thenReturn(record);
+        when(service.getByPlantingIdAndHarvestRecordId(91L, 4L, "owner@example.com"))
+                .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Harvest record not found"));
 
         mockMvc.perform(get("/api/crop-plantings/4/harvest-records/91")
                         .principal((Principal) () -> "owner@example.com")
@@ -54,6 +55,6 @@ class HarvestRecordOwnershipApiTest {
                 .andExpect(jsonPath("$.status").value(404))
                 .andExpect(jsonPath("$.code").value("NOT_FOUND"));
 
-        verify(service, never()).delete(anyLong(), anyString());
+        verify(service).getByPlantingIdAndHarvestRecordId(91L, 4L, "owner@example.com");
     }
 }

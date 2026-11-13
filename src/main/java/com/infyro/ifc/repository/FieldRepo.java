@@ -12,16 +12,33 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface FieldRepo extends JpaRepository<Field,Long> {
-    List<Field> findAllByFarm_IdAndFarm_Owner_Email(Long farmId, String email);
+public interface FieldRepo extends JpaRepository<Field, Long> {
+
+    @Query("""
+        SELECT f
+        FROM Field f
+        WHERE f.farm.id = :farmId
+          AND f.farm.owner.email = :email
+    """)
+    List<Field> findByFarm(@Param("farmId") Long farmId,
+                           @Param("email") String email);
+
+    @Query("""
+        SELECT COUNT(f)
+        FROM Field f
+        WHERE f.farm.id = :farmId
+          AND f.farm.owner.email = :email
+    """)
+    long countByFarm(@Param("farmId") Long farmId,
+                     @Param("email") String email);
 
     Optional<Field> findByIdAndFarm_Owner_Email(Long fieldId, String email);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
-    SELECT f FROM Field f
-    WHERE f.id = :fieldId
-      AND f.farm.owner.email = :email
+        SELECT f FROM Field f
+        WHERE f.id = :fieldId
+          AND f.farm.owner.email = :email
     """)
     Optional<Field> findOwnedFieldForUpdate(@Param("fieldId") Long fieldId,
                                             @Param("email") String email);

@@ -3,6 +3,8 @@ package com.infyro.ifc.service;
 import com.infyro.ifc.dto.harvest.HarvestRecordRequest;
 import com.infyro.ifc.enums.HarvestUnit;
 import com.infyro.ifc.model.CropPlanting;
+import com.infyro.ifc.model.Farm;
+import com.infyro.ifc.model.Field;
 import com.infyro.ifc.model.Expense;
 import com.infyro.ifc.model.HarvestRecord;
 import com.infyro.ifc.repository.CropPlantingRepo;
@@ -47,12 +49,13 @@ class ExpenseHarvestBusinessRuleTest {
 
     @Test
     void rejectsVoidingAnExpenseMoreThanOnce() {
-        Expense alreadyVoided = Expense.builder().id(11L).voided(true).build();
+        Farm farm = Farm.builder().id(10L).build();
+        Expense alreadyVoided = Expense.builder().id(11L).farm(farm).voided(true).build();
         when(expenses.findByIdAndFarm_Owner_Email(11L, "owner@example.com"))
                 .thenReturn(Optional.of(alreadyVoided));
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-                () -> expenseService.deleteBy(11L, "owner@example.com"));
+                () -> expenseService.deleteExpenseByIdAndFarmId(11L, 10L, "owner@example.com"));
 
         assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
         verify(expenses, never()).save(any(Expense.class));
@@ -60,12 +63,15 @@ class ExpenseHarvestBusinessRuleTest {
 
     @Test
     void rejectsVoidingAHarvestRecordMoreThanOnce() {
-        HarvestRecord alreadyVoided = HarvestRecord.builder().id(12L).voided(true).build();
+        Farm farm = Farm.builder().id(10L).build();
+        Field field = Field.builder().id(20L).farm(farm).build();
+        CropPlanting planting = CropPlanting.builder().id(5L).field(field).build();
+        HarvestRecord alreadyVoided = HarvestRecord.builder().id(12L).cropPlanting(planting).voided(true).build();
         when(harvestRecords.findByIdAndCropPlanting_Field_Farm_Owner_Email(12L, "owner@example.com"))
                 .thenReturn(Optional.of(alreadyVoided));
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-                () -> harvestRecordService.delete(12L, "owner@example.com"));
+                () -> harvestRecordService.deleteByPlantingIdAndHarvestRecordId(12L, 5L, "owner@example.com"));
 
         assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
         verify(harvestRecords, never()).save(any(HarvestRecord.class));

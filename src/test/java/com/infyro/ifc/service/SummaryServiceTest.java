@@ -32,29 +32,35 @@ class SummaryServiceTest {
     FarmSummaryService service;
 
     @Test
-    void farmSummaryExcludesVoidedRecordsAndGroupsHarvestsByUnit() {
+    void farmSummaryUsesAggregateQueriesAndGroupsHarvestsByUnit() {
         Farm farm = Farm.builder().id(5L).farmName("North Farm").build();
-        CropPlanting planned = CropPlanting.builder().id(10L).status(CropPlantingStatus.PLANNED).build();
-        CropPlanting active = CropPlanting.builder().id(11L).status(CropPlantingStatus.ACTIVE).build();
-        Expense validExpense = Expense.builder().amount(new BigDecimal("120.50"))
-                .category(ExpenseCategory.LABOUR).voided(false).build();
-        Expense voidedExpense = Expense.builder().amount(new BigDecimal("900.00"))
-                .category(ExpenseCategory.SEEDS_AND_SEEDLINGS).voided(true).build();
-        HarvestRecord kilo = HarvestRecord.builder().quantity(new BigDecimal("20.000"))
-                .unit(HarvestUnit.KILOGRAM).voided(false).build();
-        HarvestRecord tonne = HarvestRecord.builder().quantity(new BigDecimal("2.000"))
-                .unit(HarvestUnit.TONNE).voided(false).build();
-        HarvestRecord voidedHarvest = HarvestRecord.builder().quantity(new BigDecimal("999.000"))
-                .unit(HarvestUnit.KILOGRAM).voided(true).build();
 
         when(farmRepo.findByIdAndOwner_Email(5L, "owner@example.com")).thenReturn(Optional.of(farm));
-        when(fieldRepo.findAllByFarm_IdAndFarm_Owner_Email(5L, "owner@example.com")).thenReturn(List.of(new Field()));
-        when(cropPlantingRepo.findAllByField_Farm_IdAndField_Farm_Owner_Email(5L, "owner@example.com"))
-                .thenReturn(List.of(planned, active));
-        when(expenseRepo.findAllByFarm_IdAndFarm_Owner_EmailOrderByExpenseDateDescCreatedAtDesc(5L, "owner@example.com"))
-                .thenReturn(List.of(validExpense, voidedExpense));
-        when(harvestRecordRepo.findAllByCropPlanting_Field_Farm_IdAndCropPlanting_Field_Farm_Owner_EmailOrderByHarvestDateDescCreatedAtDesc(5L, "owner@example.com"))
-                .thenReturn(List.of(kilo, tonne, voidedHarvest));
+        when(fieldRepo.countByFarm(5L, "owner@example.com")).thenReturn(1L);
+        CropPlantingRepo.StatusCount plannedCount = mock(CropPlantingRepo.StatusCount.class);
+        when(plannedCount.getStatus()).thenReturn(CropPlantingStatus.PLANNED);
+        when(plannedCount.getTotal()).thenReturn(1L);
+        CropPlantingRepo.StatusCount activeCount = mock(CropPlantingRepo.StatusCount.class);
+        when(activeCount.getStatus()).thenReturn(CropPlantingStatus.ACTIVE);
+        when(activeCount.getTotal()).thenReturn(1L);
+        when(cropPlantingRepo.countByFarmGroupedByStatus(5L, "owner@example.com"))
+                .thenReturn(List.of(plannedCount, activeCount));
+        ExpenseRepo.CategoryTotal labourTotal = mock(ExpenseRepo.CategoryTotal.class);
+        when(labourTotal.getCategory()).thenReturn(ExpenseCategory.LABOUR);
+        when(labourTotal.getTotal()).thenReturn(new BigDecimal("120.50"));
+        when(labourTotal.getRecordCount()).thenReturn(1L);
+        when(expenseRepo.summarizeByFarm(5L, "owner@example.com", null, null))
+                .thenReturn(List.of(labourTotal));
+        HarvestRecordRepo.UnitTotal kiloTotal = mock(HarvestRecordRepo.UnitTotal.class);
+        when(kiloTotal.getUnit()).thenReturn(HarvestUnit.KILOGRAM);
+        when(kiloTotal.getTotal()).thenReturn(new BigDecimal("20.000"));
+        when(kiloTotal.getRecordCount()).thenReturn(1L);
+        HarvestRecordRepo.UnitTotal tonneTotal = mock(HarvestRecordRepo.UnitTotal.class);
+        when(tonneTotal.getUnit()).thenReturn(HarvestUnit.TONNE);
+        when(tonneTotal.getTotal()).thenReturn(new BigDecimal("2.000"));
+        when(tonneTotal.getRecordCount()).thenReturn(1L);
+        when(harvestRecordRepo.summarizeByFarm(5L, "owner@example.com", null, null))
+                .thenReturn(List.of(kiloTotal, tonneTotal));
 
         var result = service.getFarmSummary(5L, "owner@example.com");
 
